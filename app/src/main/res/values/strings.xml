@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Test2</string>
+    <string name="diary">Дневник</string>
+    <string name="my_title">Активности</string>
+    <string name="new_title">Новая активность</string>
+    <string name="change_title">Изменить название</string>
+    <string name="name">Название</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отменить</string>
+    <string name="example">Пример</string>
+    <string name="enter_data">Введите данные</string>
+    <string name="enter_value">"Введите значение"</string>
+    <string name="history">"История"</string>
+    <string name="z"></string>
+</resources>
