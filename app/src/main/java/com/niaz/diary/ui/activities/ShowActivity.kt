@@ -35,11 +35,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.niaz.diary.data.MyNote
+import com.niaz.diary.db.NoteEntity
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
 import com.niaz.diary.viewmodel.ShowViewModel
-import com.niaz.test2.R
+import com.niaz.diary.R
 
 class ShowActivity : ComponentActivity() {
     private val viewModel: ShowViewModel by viewModels()
@@ -47,6 +48,7 @@ class ShowActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.initMyNotes()
+        MyLogger.d("ShowActivity - iTitle=" + MyData.iTitle + "/" + MyData.titleEntities.get(MyData.iTitle).id)
         setContent {
             ShowScreen(
                 viewModel
@@ -56,13 +58,13 @@ class ShowActivity : ComponentActivity() {
 
     @Composable
     fun ShowScreen(viewModel: ShowViewModel) {
-        var offsetTitle by remember { mutableStateOf(0) }
-        var myNotes:List<MyNote> by remember { mutableStateOf(ArrayList()) }
+        var offsetTitle by remember { mutableStateOf(MyData.iTitle) }
+        var myNotes:MutableList<NoteEntity> by remember { mutableStateOf(ArrayList()) }
 
         LaunchedEffect(offsetTitle) {
-            viewModel.readMyNotes(offsetTitle).collect { newMyNotes ->
-                myNotes = newMyNotes
-                MyLogger.d("ShowActivity - LaunchedEffect offsetTitle=" + offsetTitle + "size=" + myNotes.size)
+            viewModel.readMyNotes(MyData.titleEntities[offsetTitle].id).collect { newMyNotes ->
+                myNotes = newMyNotes!!
+                MyLogger.d("ShowActivity - LaunchedEffect offsetTitle=" + offsetTitle + " size=" + myNotes.size)
             }
         }
 
@@ -106,7 +108,7 @@ class ShowActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ShowMyNote(myNote: MyNote) {
+    fun ShowMyNote(myNote: NoteEntity) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,7 +119,7 @@ class ShowActivity : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = myNote.date,
+                text = myNote.date!!,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -127,7 +129,7 @@ class ShowActivity : ComponentActivity() {
             Spacer(modifier = Modifier.width(10.dp))
 
             Text(
-                text = myNote.note,
+                text = myNote.note!!,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier

@@ -1,19 +1,29 @@
 package com.niaz.diary.viewmodel
 
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.niaz.diary.MyApp
+import com.niaz.diary.R
 import com.niaz.diary.db.TitleEntity
 import com.niaz.diary.db.TitlesRepo
 import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ListViewModel : ViewModel() {
+@HiltViewModel
+class ListViewModel @Inject constructor(
+    @ApplicationContext private val context: Context
+) : ViewModel() {
 
     private val _titleEntities = MutableStateFlow<List<TitleEntity>>(emptyList())
     val titleEntities: StateFlow<List<TitleEntity>> = _titleEntities
@@ -43,7 +53,7 @@ class ListViewModel : ViewModel() {
         for (titleEntity in titleEntities) {
             MyLogger.d("ListViewModel - addTitlesToDatabase title=" + titleEntity.title + " size before=" + this.titleEntities.value.size)
             titlesRepo.insertTitleEntity(titleEntity)
-            MyData.titleEntities.add(titleEntity) // add a few titleEntities
+            MyData.titleEntities.add(titleEntity)
         }
     }
 
@@ -83,9 +93,10 @@ class ListViewModel : ViewModel() {
 
     fun initTitleEntities(): MutableList<TitleEntity> {
         var titlesEntities:MutableList<TitleEntity> = ArrayList()
-        titlesEntities.add(TitleEntity("Line 1"))
-        titlesEntities.add(TitleEntity("Line 2"))
-        titlesEntities.add(TitleEntity("Line 3"))
+        titlesEntities.add(TitleEntity(context.getString(R.string.title_1)))
+        titlesEntities.add(TitleEntity(context.getString(R.string.title_2)))
+        titlesEntities.add(TitleEntity(context.getString(R.string.title_3)))
+        titlesEntities.add(TitleEntity(context.getString(R.string.title_4)))
         return titlesEntities
     }
 

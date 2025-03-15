@@ -5,12 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.niaz.diary.data.MyNote
+import com.niaz.diary.db.DbTools
+import com.niaz.diary.db.NoteEntity
 import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyCalendar
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyLogger
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.flowOn
 import java.util.Calendar
 
 class ShowViewModel : ViewModel() {
+    private val dbTools = DbTools()
     private val myCalendar = MyCalendar()
     private var calendar = Calendar.getInstance()
     private val _text = MutableLiveData<String>().apply {
@@ -39,22 +41,12 @@ class ShowViewModel : ViewModel() {
         myNotes.add(MyNote(4, "21-10-2024", "17"))
     }
 
-    fun readMyNotes(offsetTitle:Int): Flow<List<MyNote>> = flow {
-        val myNotes = loadMyNotesFromDatabase(offsetTitle)
+    fun readMyNotes(titleId:Int): Flow<MutableList<NoteEntity>?> = flow {
+        dbTools.loadNotesAll() // for debug
+        val myNotes = dbTools.loadNotesByTitleId(titleId)
         emit(myNotes)
     }.flowOn(Dispatchers.IO)
 
-
-    fun loadMyNotesFromDatabase(offsetTitle:Int):List<MyNote>{
-        val myNotes:MutableList<MyNote> = ArrayList()
-        for (i in 0 until 3){
-            myNotes.add(MyNote(offsetTitle,
-                "dateA" + i.toString(),
-                (System.currentTimeMillis() / 1000).toString()))
-        }
-        MyLogger.d("ShowViewModel - loadMyNotesFromDatabase size=" + myNotes.size)
-        return myNotes
-    }
 
     fun getDate(calendar: Calendar): String {
         val date = myCalendar.calendarToDD_MM_YYYY(calendar) + ", " +

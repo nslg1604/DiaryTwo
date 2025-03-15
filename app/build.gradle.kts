@@ -2,16 +2,16 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    // below to avoid room error "AppDatabase_Impl does not exist"
     id ("org.jetbrains.kotlin.kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
-    namespace = "com.niaz.test2"
+    namespace = "com.niaz.diary"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.niaz.test2"
+        applicationId = "com.niaz.diary"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -67,5 +67,16 @@ dependencies {
     // line below to avoid "AppDatabase_Impl does not exist"
     kapt ("androidx.room:room-compiler:2.6.1")
 
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // Для поддержки ViewModel с Hilt
+    implementation(libs.hilt.navigation.compose)
+
+//    implementation("com.google.dagger:hilt-android:2.55")
+//    kapt("com.google.dagger:hilt-android-compiler:2.55")
+//    implementation 'com.google.dagger:hilt-android:2.55'
+//    annotationProcessor 'com.google.dagger:hilt-compiler:2.55'
 
 }

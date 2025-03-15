@@ -33,7 +33,7 @@ class EditViewModel : ViewModel() {
     val note: StateFlow<String> = _note.asStateFlow()
 
     fun readNote(): Flow<String> = flow {
-        MyLogger.d("EditViewModel - readNote iTitle=" + MyData.iTitle + " titleId=" + MyData.titleEntities.get(MyData.iTitle).id + " date=" + MyData.date)
+        MyLogger.d("EditViewModel - readNote iTitle=" + MyData.iTitle + "/" + MyData.titleEntities.get(MyData.iTitle).id + " date=" + MyData.date)
         val loadedNote = dbTools.loadNoteFromDatabase(
             MyData.titleEntities.get(MyData.iTitle).id,
             MyData.date
@@ -42,13 +42,26 @@ class EditViewModel : ViewModel() {
     }.flowOn(Dispatchers.IO)
 
     fun updateNoteAsync(newNote: String) {
+        MyLogger.d("EditViewModel - updateNoteAsync " + MyData.iTitle + "/" + MyData.titleEntities.get(MyData.iTitle).id + " " + MyData.date + "/" + newNote)
         val noteEntity = NoteEntity(
             MyData.titleEntities.get(MyData.iTitle).id,
             MyData.date,
             newNote
         )
+
         viewModelScope.launch(Dispatchers.IO) {
-            dbTools.saveNoteToDatabase(noteEntity)
+            val loadedNote = dbTools.loadNoteFromDatabase(
+                MyData.titleEntities.get(MyData.iTitle).id,
+                MyData.date
+            )
+            MyLogger.d("EditViewModel - updateNoteAsync exists " + MyData.iTitle + "/" + MyData.titleEntities.get(MyData.iTitle).id + " " + MyData.date + "/" + loadedNote)
+
+            if (loadedNote.isEmpty()) {
+                dbTools.saveNoteToDatabase(noteEntity)
+            }
+            else {
+                dbTools.updateNoteInDatabase(noteEntity)
+            }
             _note.value = newNote // update StateFlow
         }
     }
@@ -61,19 +74,19 @@ class EditViewModel : ViewModel() {
     }
 
     fun getInfo(infoType: String, offset: Int): String {
-        MyLogger.d("EditViewModel - getInfo infoType=$infoType offset=$offset")
+//        MyLogger.d("EditViewModel - getInfo infoType=$infoType offset=$offset")
         if (infoType.equals(MyConst.INFO_CALENDAR)) {
             var calendar = Calendar.getInstance()
             calendar.add(Calendar.DAY_OF_MONTH, offset)
             val date = getDate(calendar)
             MyData.date = date
-            MyLogger.d("EditViewModel - getInfo date=$date")
+//            MyLogger.d("EditViewModel - getInfo date=$date")
             return date
         }
         if (infoType.equals(MyConst.INFO_TITLES)) {
             MyData.iTitle = offset
             val title = MyData.titleEntities.get(offset).title
-            MyLogger.d("EditViewModel - getInfo iTitle=" + offset + " title=$title")
+//            MyLogger.d("EditViewModel - getInfo iTitle=" + offset + " title=$title")
             return title
         }
         return ""

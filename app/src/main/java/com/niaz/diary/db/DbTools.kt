@@ -12,7 +12,7 @@ class DbTools {
             MyLogger.e("DbTools - saveNoteToDatabase EMPTY note not saved titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
             return
         }
-        MyLogger.e("DbTools - saveNoteToDatabase titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+        MyLogger.d("DbTools - saveNoteToDatabase titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
         val db = MyApp.getInstance().getDatabase()
         if (db == null) {
             MyLogger.e("DbTools - saveNoteToDatabase db=null")
@@ -21,12 +21,26 @@ class DbTools {
         val noteDao = db.noteDao()
         val noteRepo = NoteRepo(noteDao = noteDao)
         noteRepo.insertNote(noteEntity)
+    }
 
-        loadNotes()
+    suspend fun updateNoteInDatabase(noteEntity: NoteEntity) {
+        if (noteEntity.note.isNullOrEmpty()){
+            MyLogger.e("DbTools - updateNoteInDatabase EMPTY note not saved titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+            return
+        }
+        MyLogger.e("DbTools - updateNoteInDatabase titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+        val db = MyApp.getInstance().getDatabase()
+        if (db == null) {
+            MyLogger.e("DbTools - updateNoteInDatabase db=null")
+            return
+        }
+        val noteDao = db.noteDao()
+        val noteRepo = NoteRepo(noteDao = noteDao)
+        noteRepo.updateNote(noteEntity)
     }
 
     suspend fun loadNoteFromDatabase(titleId:Int, date:String):String {
-        MyLogger.e("DbTools - loadNoteFromDatabase titleId=" + titleId + " date=" + date)
+        MyLogger.d("DbTools - loadNoteFromDatabase titleId=" + titleId + " date=" + date)
         val db = MyApp.getInstance().getDatabase()
         if (db == null) {
             MyLogger.e("DbTools - loadNoteFromDatabase db=null")
@@ -36,15 +50,37 @@ class DbTools {
         val noteRepo = NoteRepo(noteDao = noteDao)
         val noteEntity = noteRepo.getNote(titleId, date)
         if (noteEntity == null){
-            MyLogger.d("DbTools - loadNoteFromDatabase not found")
+            MyLogger.e("DbTools - loadNoteFromDatabase not found")
             return ""
         }
         MyLogger.d("DbTools - loadNoteFromDatabase found note=" + noteEntity.note)
         return noteEntity.note!!
     }
     
-    suspend fun loadNotes():MutableList<NoteEntity>? {
-        MyLogger.d("DbTools - loadNotes")
+    suspend fun loadNotesByTitleId(titleId: Int):MutableList<NoteEntity>? {
+        MyLogger.d("DbTools - loadNotesByTitleId titleId=" + titleId)
+        val db = MyApp.getInstance().getDatabase()
+        if (db == null) {
+            MyLogger.e("DbTools - loadNotesByTitleId db=null")
+            return null
+        }
+        val noteDao = db.noteDao()
+        val noteRepo = NoteRepo(noteDao = noteDao)
+        val notes = noteRepo.getNotesByTitleId(titleId)
+        if (notes == null){
+            MyLogger.e("DbTools - loadNotesByTitleId not found")
+            return null
+        }
+        MyLogger.d("DbTools - loadNotesByTitleId found notes.size=" + notes.size)
+        for (noteEntity in notes){
+            MyLogger.d("-- id=" + noteEntity.id + " titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+        }
+
+        return notes
+    }
+
+    suspend fun loadNotesAll():MutableList<NoteEntity>? {
+        MyLogger.d("DbTools - loadNotesAll")
         val db = MyApp.getInstance().getDatabase()
         if (db == null) {
             MyLogger.e("DbTools - loadNotes db=null")
@@ -54,10 +90,10 @@ class DbTools {
         val noteRepo = NoteRepo(noteDao = noteDao)
         val notes = noteRepo.getNotes()
         if (notes == null){
-            MyLogger.d("DbTools - loadNotes not found")
+            MyLogger.e("DbTools - loadNotesAll not found")
             return null
         }
-        MyLogger.d("DbTools - loadNotes found notes.size=" + notes.size)
+        MyLogger.d("DbTools - loadNotesAll found notes.size=" + notes.size)
         for (noteEntity in notes){
             MyLogger.d("=== id=" + noteEntity.id + " titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
         }
@@ -65,18 +101,18 @@ class DbTools {
         return notes
     }
 
-    fun loadNotesAsync(viewModelScope:CoroutineScope) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val notes:MutableList<NoteEntity>? = loadNotes()
-//            if (notes.isNullOrEmpty()){
-//                MyLogger.d("loadNotesAsync EMPTY")
-//                return@launch
-//            }
-//            for (noteEntity in notes){
-//                MyLogger.d("loadNotesAsync id=" + noteEntity.id + " titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
-//            }
-        }
-    }
+//    fun loadNotesAsync(viewModelScope:CoroutineScope) {
+//        viewModelScope.launch(Dispatchers.IO) {
+//            val notes:MutableList<NoteEntity>? = loadNotesByTitleId()
+////            if (notes.isNullOrEmpty()){
+////                MyLogger.d("loadNotesAsync EMPTY")
+////                return@launch
+////            }
+////            for (noteEntity in notes){
+////                MyLogger.d("loadNotesAsync id=" + noteEntity.id + " titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+////            }
+//        }
+//    }
 
 
 }

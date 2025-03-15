@@ -9,11 +9,16 @@ class NoteRepo(private val noteDao: NoteDao) {
         return noteDao.getNotes()
     }
 
+    suspend fun getNotesByTitleId(titleId: Int): MutableList<NoteEntity>? {
+        return noteDao.getNotesByTitleId(titleId)
+    }
+
     suspend fun getNote(titleId: Int, date: String): NoteEntity? {
         return noteDao.getNoteByTitleIdAndDate(titleId, date)
     }
 
-    suspend fun updateNote(titleId: Int, date: String, note:String) {
-        return noteDao.updateNoteByTitleIdAndDate(titleId, date, note)
+    suspend fun updateNote(noteEntity: NoteEntity) {
+        return noteDao.updateNoteByTitleIdAndDate(noteEntity.titleId,
+            noteEntity.date!!, noteEntity.note!!)
     }
 }

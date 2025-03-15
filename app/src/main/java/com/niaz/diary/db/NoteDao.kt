@@ -14,15 +14,18 @@ interface NoteDao {
 //    @Query("SELECT * FROM notes WHERE title_id = :titleId")
 //    fun getNotesByTitleId(titleId: Int): List<NoteEntity>
 
-    // Получение всех записей
+    // Get notes by title
     @Query("SELECT * FROM notes")
     fun getNotes(): MutableList<NoteEntity>
+
+    // Получение всех записей
+    @Query("SELECT * FROM notes WHERE title_id = :titleId")
+    fun getNotesByTitleId(titleId: Int): MutableList<NoteEntity>
 
     // Получение записи по titleId и date
     @Query("SELECT * FROM notes WHERE title_id = :titleId AND date = :date")
     fun getNoteByTitleIdAndDate(titleId: Int, date: String): NoteEntity?
 
-    // Обновление записи по titleId и date (обновляется только поле note)
     @Query("UPDATE notes SET note = :newNote WHERE title_id = :titleId AND date = :date")
     fun updateNoteByTitleIdAndDate(titleId: Int, date: String, newNote: String)
 

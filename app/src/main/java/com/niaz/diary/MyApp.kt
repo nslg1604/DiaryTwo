@@ -4,9 +4,9 @@ import android.app.Application
 import androidx.room.Room.databaseBuilder
 import com.niaz.diary.db.AppDatabase
 import com.niaz.diary.utils.MyLogger
-//import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.android.HiltAndroidApp
 
-//@HiltAndroidApp
+@HiltAndroidApp
 class MyApp : Application() {
     private var database: AppDatabase? = null
 

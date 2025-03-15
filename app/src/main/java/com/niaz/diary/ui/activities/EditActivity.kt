@@ -27,7 +27,7 @@ import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
 import com.niaz.diary.viewmodel.EditViewModel
-import com.niaz.test2.R
+import com.niaz.diary.R
 
 
 class EditActivity : ComponentActivity() {
@@ -132,7 +132,7 @@ class EditActivity : ComponentActivity() {
         note: String,
         onOffsetChange: (Int) -> Unit
     ) {
-        MyLogger.d("-------EditActivity - ShowInfo " + infoType)
+//        MyLogger.d("-------EditActivity - ShowInfo " + infoType)
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(
@@ -207,7 +207,7 @@ class EditActivity : ComponentActivity() {
                 )
             }
         }
-        MyLogger.d("EditActivity - ShowInfo infoType=$infoType offset=$offset")
+
     }
 
 
