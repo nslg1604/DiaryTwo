@@ -11,14 +11,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Test2"
+        android:theme="@style/Theme.Diary"
         tools:targetApi="31">
 
         <activity
             android:name="com.niaz.diary.ui.activities.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Test2">
+            android:theme="@style/Theme.Diary">
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 
@@ -30,7 +30,7 @@
             android:name="com.niaz.diary.ui.activities.AddActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Test2">
+            android:theme="@style/Theme.Diary">
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 
@@ -42,7 +42,7 @@
             android:name="com.niaz.diary.ui.activities.ListActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Test2">
+            android:theme="@style/Theme.Diary">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -54,14 +54,14 @@
             android:name="com.niaz.diary.ui.activities.EditActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Test2">
+            android:theme="@style/Theme.Diary">
         </activity>
 
         <activity
             android:name="com.niaz.diary.ui.activities.ShowActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Test2">
+            android:theme="@style/Theme.Diary">
         </activity>
 
     </application>

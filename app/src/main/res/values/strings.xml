@@ -15,5 +15,13 @@
     <string name="title_2">Пробежка, мин</string>
     <string name="title_3">Велосипед, км</string>
     <string name="title_4">Температура на улице</string>
+    <string name="export_db">Экспорт базы данных</string>
+    <string name="import_db">Импорт базы данных</string>
+    <string name="about">О программе</string>
+    <string name="version">Версия: </string>
+    <string name="close">Закрыть</string>
+    <string name="db_not_found">База данных не найдена: %s</string>
+    <string name="db_exported">База данных экспортирована в\n%s</string>
+    <string name="db_export_error">Ошибка экспорта базы данных в %s</string>
     <string name="z"></string>
 </resources>

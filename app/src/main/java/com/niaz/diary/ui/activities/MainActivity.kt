@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.niaz.diary.ui.theme.Test2Theme
+import com.niaz.diary.ui.theme.DiaryTheme
 
 
 class MainActivity : ComponentActivity() {
@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
         val counter = mutableStateOf(0)
         enableEdgeToEdge()
         setContent {
-            Test2Theme {
+            DiaryTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column (
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,7 +82,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    Test2Theme {
+    DiaryTheme {
         Greeting("Android")
     }
 }

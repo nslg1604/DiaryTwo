@@ -3,6 +3,7 @@ package com.niaz.diary
 import android.app.Application
 import androidx.room.Room.databaseBuilder
 import com.niaz.diary.db.AppDatabase
+import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyLogger
 import dagger.hilt.android.HiltAndroidApp
 
@@ -27,8 +28,9 @@ class MyApp : Application() {
     fun createDatabase() {
         MyLogger.d("MyApp - createDatabase")
         database = databaseBuilder(
-            this, AppDatabase::
-            class.java, "database"
+            this,
+            AppDatabase::class.java,
+            MyConst.DB_NAME
         ).build()
         if (database == null){
             MyLogger.e("MyApp - error creating database")

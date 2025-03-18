@@ -1,14 +1,14 @@
 package com.niaz.diary.viewmodel
 
-import android.app.Application
 import android.content.Context
-import androidx.lifecycle.AndroidViewModel
+import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.niaz.diary.MyApp
 import com.niaz.diary.R
 import com.niaz.diary.db.TitleEntity
 import com.niaz.diary.db.TitlesRepo
+import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,8 +16,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,6 +29,9 @@ class ListViewModel @Inject constructor(
 
     private val _titleEntities = MutableStateFlow<List<TitleEntity>>(emptyList())
     val titleEntities: StateFlow<List<TitleEntity>> = _titleEntities
+
+    private var _message = MutableStateFlow<String>("")
+    val message: StateFlow<String> = _message.asStateFlow()
 
     fun readTitleEntitiesFromDatabaseAsync() {
         viewModelScope.launch {
@@ -126,7 +131,40 @@ class ListViewModel @Inject constructor(
         val titlesRepo = TitlesRepo(titleDao = titleDao)
         titlesRepo.insertTitleEntity(titleEntity)
         MyData.titleEntities.add(titleEntity)  // add one titleEntity
+    }
 
+    fun onExportDatabase() {
+        MyLogger.d("ListViewModel - onExportDatabase")
+        val databasePath = context.getDatabasePath(MyConst.DB_NAME)
+
+        if (!databasePath.exists()) {
+            MyLogger.e("ListViewModel - onExportDatabase - not found")
+            _message.value = context.resources.getString(R.string.db_not_found, MyConst.DB_NAME)
+            return
+        }
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        if (!downloadsDir.exists()) {
+            downloadsDir.mkdirs()
+        }
+
+        val destinationFile = File(downloadsDir, MyConst.DB_NAME)
+        val destPath = "/" + Environment.DIRECTORY_DOWNLOADS + "/" + MyConst.DB_NAME
+        try {
+            databasePath.copyTo(destinationFile, overwrite = true)
+            MyLogger.d("ListViewModel - onExportDatabase - exported")
+            _message.value = context.resources.getString(R.string.db_exported, destPath)
+        } catch (e: Exception) {
+            MyLogger.e("ListViewModel - onExportDatabase - error=" + e)
+            _message.value = context.resources.getString(R.string.db_export_error, destPath)
+        }
+    }
+
+    fun resetMessage() {
+        _message.value = ""
+    }
+
+    private fun onImportDatabase() {
+        // todo
     }
 
 
