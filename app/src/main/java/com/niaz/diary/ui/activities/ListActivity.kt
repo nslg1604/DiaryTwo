@@ -509,7 +509,6 @@ fun AboutDialog(onDismiss: () -> Unit) {
                 Text(appName)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(stringResource(R.string.version) + versionName)
-                ("Версия: $versionName")
             }
         },
         confirmButton = {

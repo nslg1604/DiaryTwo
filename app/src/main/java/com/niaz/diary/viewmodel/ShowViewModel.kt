@@ -31,22 +31,12 @@ class ShowViewModel : ViewModel() {
 
     private val _note = MutableStateFlow("")
     val note: StateFlow<String> = _note.asStateFlow()
-    var iNote = 0
-    var myNotes:MutableList<MyNote> = ArrayList()
-
-    fun initMyNotes(){
-        myNotes.add(MyNote(1, "11-09-2003", "3"))
-        myNotes.add(MyNote(2, "12-02-2023", "53"))
-        myNotes.add(MyNote(3, "19-09-2024", "63"))
-        myNotes.add(MyNote(4, "21-10-2024", "17"))
-    }
 
     fun readMyNotes(titleId:Int): Flow<MutableList<NoteEntity>?> = flow {
         dbTools.loadNotesAll() // for debug
         val myNotes = dbTools.loadNotesByTitleId(titleId)
         emit(myNotes)
     }.flowOn(Dispatchers.IO)
-
 
     fun getDate(calendar: Calendar): String {
         val date = myCalendar.calendarToDD_MM_YYYY(calendar) + ", " +
