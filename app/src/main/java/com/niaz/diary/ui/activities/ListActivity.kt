@@ -35,7 +35,6 @@ import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
 import com.niaz.diary.viewmodel.ListViewModel
 import com.niaz.diary.R
-import dagger.hilt.EntryPoint
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.ui.platform.LocalContext
 
@@ -59,10 +58,9 @@ class ListActivity : ComponentActivity() {
     fun DiaryScreen(onTitleAdded: (String) -> Unit) {
         var addTitle by remember { mutableStateOf(false) }
         var titles by remember { mutableStateOf<List<String>>(emptyList()) }
-        var showMenu by remember { mutableStateOf(false) }
-        var showAboutDialog by remember { mutableStateOf(false) }
         val message by viewModel.message.collectAsState()
         var exportImportDialog by remember { mutableStateOf(false) }
+        val titleEntities by viewModel.titleEntities.collectAsState()
 
         LaunchedEffect(message) {
             if (!message.isNullOrEmpty()) {
@@ -75,14 +73,13 @@ class ListActivity : ComponentActivity() {
             viewModel.readTitleEntitiesFromDatabaseAsync()
         }
 
-        val titleEntities by viewModel.titleEntities.collectAsState()
-
         LaunchedEffect(titleEntities) {
             if (titleEntities != null) {
                 titles = titleEntities!!.map { it.title ?: "" }
             }
         }
 
+        // Rows with titles
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -90,6 +87,7 @@ class ListActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {  // Column
 
+            // Top title
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -102,54 +100,10 @@ class ListActivity : ComponentActivity() {
                     modifier = Modifier.weight(1f)
                 )
 
-                Box {
-                    IconButton(onClick = { showMenu = !showMenu }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-                    }
-
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                        modifier = Modifier.wrapContentSize()
-                    ) {
-
-                        DropdownMenuItem(
-                            onClick = {
-                                showMenu = false
-                                viewModel.onExportDatabase()
-                            },
-                            text = {
-                                Text(stringResource(R.string.export_db))
-                            }
-                        )
-
-                        DropdownMenuItem(
-                            onClick = {
-                                showMenu = false
-//                                onImportDatabase()
-                            },
-                            text = {
-                                Text(stringResource(R.string.import_db))
-                            }
-                        )
-
-                        DropdownMenuItem(
-                            onClick = {
-                                showMenu = false
-                                showAboutDialog = true
-                            },
-                            text = {
-                                Text(stringResource(R.string.about))
-                            }
-                        )
-                    }
-                }
+                MyMenu(viewModel)
             }
 
-            if (showAboutDialog) {
-                AboutDialog(onDismiss = { showAboutDialog = false })
-            }
-
+            // All titles
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -168,6 +122,7 @@ class ListActivity : ComponentActivity() {
                 }
             }
 
+            // Bottom +
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -237,9 +192,63 @@ class ListActivity : ComponentActivity() {
                 }
             )
         }
+    }  // DiaryScreen
 
+}
+
+@Composable
+fun MyMenu(viewModel: ListViewModel){
+    var showMenu by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
+    MyLogger.d("ListActivity - myMenu")
+    Box {
+        IconButton(onClick = {
+            showMenu = !showMenu
+            MyLogger.d("ListActivity - myMenu - onClick show=" + showMenu)
+        }) {
+            Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+        }
+
+        DropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false },
+            modifier = Modifier.wrapContentSize()
+        ) {
+
+            DropdownMenuItem(
+                onClick = {
+                    showMenu = false
+                    viewModel.onExportDatabase()
+                },
+                text = {
+                    Text(stringResource(R.string.export_db))
+                }
+            )
+
+            DropdownMenuItem(
+                onClick = {
+                    showMenu = false
+//                                onImportDatabase()
+                },
+                text = {
+                    Text(stringResource(R.string.import_db))
+                }
+            )
+
+            DropdownMenuItem(
+                onClick = {
+                    showMenu = false
+                    showAboutDialog = true
+                },
+                text = {
+                    Text(stringResource(R.string.about))
+                }
+            )
+        }
     }
-
+    if (showAboutDialog) {
+        AboutDialog(onDismiss = { showAboutDialog = false })
+    }
 }
 
 @Composable
@@ -518,4 +527,6 @@ fun AboutDialog(onDismiss: () -> Unit) {
         }
 
     )
+
+
 }
