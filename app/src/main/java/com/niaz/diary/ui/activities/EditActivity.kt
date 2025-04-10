@@ -2,6 +2,7 @@ package com.niaz.diary.ui.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
@@ -49,10 +50,20 @@ class EditActivity : ComponentActivity() {
         var offsetCalendar by remember { mutableStateOf(0) }
         var note by remember { mutableStateOf("") }
 
+//        BackHandler() {
+//            MyLogger.d("EditActivity - back")
+//        }
+
         LaunchedEffect(offsetTitle, offsetCalendar) {
             viewModel.readNote().collect { newNote ->
                 note = newNote
             }
+        }
+
+        BackHandler() {
+            MyLogger.d("EditActivity - back")
+            viewModel.updateNoteAsync(note)
+            finish()
         }
 
         Column(

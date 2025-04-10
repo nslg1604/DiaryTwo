@@ -1,7 +1,9 @@
 package com.niaz.diary.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
+import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.niaz.diary.MyApp
@@ -17,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -36,34 +39,18 @@ class ListViewModel @Inject constructor(
     fun readTitleEntitiesFromDatabaseAsync() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                var entities = readTitleEntitiesFromDatabase()
+                val entities = readTitleEntitiesFromDatabase()
                 if (entities.isNullOrEmpty()){
-                    entities = initTitleEntities()
-                    addTitlesToDatabase(entities)
+                    initTitleEntities()
                 }
-                _titleEntities.value = entities
+                else {
+                    _titleEntities.value = entities!!.toList()
+                }
             }
         }
     }
 
-    suspend fun addTitlesToDatabase(titleEntities:MutableList<TitleEntity>) {
-        MyLogger.d("ListViewModel - addTitlesToDatabase")
-        val db = MyApp.getInstance().getDatabase()
-        if (db == null) {
-            MyLogger.e("ListViewModel - addTitlesToDatabase db=null")
-            return
-        }
-        val titleDao = db.titleDao()
-        val titlesRepo = TitlesRepo(titleDao = titleDao)
-        for (titleEntity in titleEntities) {
-            MyLogger.d("ListViewModel - addTitlesToDatabase title=" + titleEntity.title + " size before=" + this.titleEntities.value.size)
-            titlesRepo.insertTitleEntity(titleEntity)
-            MyData.titleEntities.add(titleEntity)
-        }
-    }
-
-
-    suspend fun readTitleEntitiesFromDatabase():MutableList<TitleEntity>? {
+    suspend fun readTitleEntitiesFromDatabase():List<TitleEntity>? {
         MyLogger.d("ListViewModel - readTitlesFromDatabase")
         val db = MyApp.getInstance().getDatabase()
         if (db == null) {
@@ -76,33 +63,17 @@ class ListViewModel @Inject constructor(
         MyLogger.d("ListViewModel - readTitlesFromDatabase title.size=" + titleEntities?.size)
 
         titleEntities.forEach{ titleEntity ->
-            MyLogger.d("titleEntity id=${titleEntity.id} title=${titleEntity.title} ")
+            MyLogger.d("ListViewModel - titleEntity id=${titleEntity.id} title=${titleEntity.title} ")
         }
         MyData.titleEntities = titleEntities
         return titleEntities
     }
 
-    fun addTitlesToDatabaseAsync(titlesEntities:MutableList<TitleEntity>) {
-        var titlesEntities:MutableList<TitleEntity> = ArrayList()
-        MyLogger.d("ListViewModel - addTitlesToDatabaseAsync")
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    addTitlesToDatabase(titlesEntities)
-                } catch (e: Exception) {
-                    MyLogger.e("ListViewModel - addTitlesToDatabaseAsync error=" + e)
-                }
-            }
-        }
-    }
-
-    fun initTitleEntities(): MutableList<TitleEntity> {
-        var titlesEntities:MutableList<TitleEntity> = ArrayList()
-        titlesEntities.add(TitleEntity(context.getString(R.string.title_1)))
-        titlesEntities.add(TitleEntity(context.getString(R.string.title_2)))
-        titlesEntities.add(TitleEntity(context.getString(R.string.title_3)))
-        titlesEntities.add(TitleEntity(context.getString(R.string.title_4)))
-        return titlesEntities
+    suspend fun initTitleEntities(){
+        addTitleToDatabase(TitleEntity(context.getString(R.string.title_1)))
+        addTitleToDatabase(TitleEntity(context.getString(R.string.title_2)))
+        addTitleToDatabase(TitleEntity(context.getString(R.string.title_3)))
+        addTitleToDatabase(TitleEntity(context.getString(R.string.title_4)))
     }
 
     fun addTitleToDatabaseAsync(titleEntity:TitleEntity) {
@@ -118,7 +89,6 @@ class ListViewModel @Inject constructor(
         }
     }
 
-
     suspend fun addTitleToDatabase(titleEntity: TitleEntity) {
         MyLogger.d("ListViewModel - addTitleToDatabase")
         val db = MyApp.getInstance().getDatabase()
@@ -129,8 +99,73 @@ class ListViewModel @Inject constructor(
         MyLogger.d("ListViewModel - addTitlesToDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
         val titleDao = db.titleDao()
         val titlesRepo = TitlesRepo(titleDao = titleDao)
-        titlesRepo.insertTitleEntity(titleEntity)
-        MyData.titleEntities.add(titleEntity)  // add one titleEntity
+        val idNew = titlesRepo.insertTitleEntity(titleEntity) // add one title
+        val titleEntityNew = titleEntity.copy(id = idNew!!.toInt())
+        _titleEntities.update { currentList -> currentList + titleEntityNew }
+        MyData.titleEntities.add(titleEntityNew)
+    }
+
+    fun updateTitleInDatabaseAsync(titleEntity:TitleEntity) {
+        MyLogger.d("ListViewModel - updateTitleInDatabaseAsync")
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    updateTitleInDatabase(titleEntity)
+                    _titleEntities.update { oldList ->
+                        oldList.map { if (it.id == titleEntity.id) titleEntity else it }
+                    }
+                } catch (e: Exception) {
+                    MyLogger.e("ListViewModel - updateTitleInDatabaseAsync error=" + e)
+                }
+            }
+        }
+    }
+
+    suspend fun updateTitleInDatabase(titleEntity: TitleEntity) {
+        MyLogger.d("ListViewModel - updateTitleInDatabase")
+        val db = MyApp.getInstance().getDatabase()
+        if (db == null) {
+            MyLogger.e("ListViewModel - updateTitleInDatabase db=null")
+            return
+        }
+        MyLogger.d("ListViewModel - updateTitleInDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
+        val titleDao = db.titleDao()
+        val titlesRepo = TitlesRepo(titleDao = titleDao)
+        titlesRepo.updateTitleEntity(titleEntity)
+    }
+
+    suspend fun deleteTitleInDatabase(titleEntity: TitleEntity) {
+        MyLogger.d("ListViewModel - deleteTitleInDatabase")
+        val db = MyApp.getInstance().getDatabase()
+        if (db == null) {
+            MyLogger.e("ListViewModel - deleteTitleInDatabase db=null")
+            return
+        }
+        MyLogger.d("ListViewModel - deleteTitleInDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
+        val titleDao = db.titleDao()
+        val titlesRepo = TitlesRepo(titleDao = titleDao)
+        titlesRepo.deleteTitleEntity(titleEntity)
+    }
+
+
+    fun deleteTitleInDatabaseAsync(titleEntity:TitleEntity) {
+        MyLogger.d("ListViewModel - deleteTitleInDatabaseAsync")
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    deleteTitleInDatabase(titleEntity)
+                    _titleEntities.update { oldList ->
+                        oldList.filterNot { it.id == titleEntity.id }
+                    }
+                } catch (e: Exception) {
+                    MyLogger.e("ListViewModel - deleteTitleInDatabaseAsync error=" + e)
+                }
+            }
+        }
+    }
+
+    fun resetMessage() {
+        _message.value = ""
     }
 
     fun onExportDatabase() {
@@ -159,13 +194,41 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    fun resetMessage() {
-        _message.value = ""
+    fun importDatabaseFromUri(context:Context, uri: Uri) {
+        val sourcePath = getFileNameFromUri(context, uri)
+        MyLogger.d("ListViewModel - importDatabaseFromUri $sourcePath")
+        try {
+            MyApp.getInstance().closeDatabase()
+
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val databaseFile = context.getDatabasePath(MyConst.DB_NAME)
+
+            inputStream?.use { input ->
+                databaseFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            MyLogger.d("ListViewModel - onImportDatabase - imported")
+            _message.value = context.resources.getString(R.string.db_imported, sourcePath)
+
+            readTitleEntitiesFromDatabaseAsync()
+
+        } catch (e: Exception) {
+            MyLogger.e("ListViewModel - onImportDatabase - error=" + e)
+            _message.value = context.resources.getString(R.string.db_import_error, sourcePath)
+        }
     }
 
-    private fun onImportDatabase() {
-        // todo
+    fun getFileNameFromUri(context: Context, uri: Uri): String? {
+        val returnCursor = context.contentResolver.query(uri, null, null, null, null)
+        returnCursor?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (cursor.moveToFirst() && nameIndex != -1) {
+                return cursor.getString(nameIndex)
+            }
+        }
+        return null
     }
-
 
 }

@@ -4,7 +4,6 @@ package com.niaz.diary.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.niaz.diary.data.MyNote
 import com.niaz.diary.db.DbTools
 import com.niaz.diary.db.NoteEntity
 import com.niaz.diary.utils.MyData

@@ -2,9 +2,6 @@ package com.niaz.diary.db
 
 import com.niaz.diary.MyApp
 import com.niaz.diary.utils.MyLogger
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class DbTools {
     suspend fun saveNoteToDatabase(noteEntity: NoteEntity) {
@@ -28,7 +25,7 @@ class DbTools {
             MyLogger.e("DbTools - updateNoteInDatabase EMPTY note not saved titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
             return
         }
-        MyLogger.e("DbTools - updateNoteInDatabase titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+        MyLogger.d("DbTools - updateNoteInDatabase titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
         val db = MyApp.getInstance().getDatabase()
         if (db == null) {
             MyLogger.e("DbTools - updateNoteInDatabase db=null")
@@ -100,19 +97,5 @@ class DbTools {
 
         return notes
     }
-
-//    fun loadNotesAsync(viewModelScope:CoroutineScope) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            val notes:MutableList<NoteEntity>? = loadNotesByTitleId()
-////            if (notes.isNullOrEmpty()){
-////                MyLogger.d("loadNotesAsync EMPTY")
-////                return@launch
-////            }
-////            for (noteEntity in notes){
-////                MyLogger.d("loadNotesAsync id=" + noteEntity.id + " titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
-////            }
-//        }
-//    }
-
 
 }

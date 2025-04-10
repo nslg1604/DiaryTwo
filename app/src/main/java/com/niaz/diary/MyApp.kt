@@ -44,6 +44,12 @@ class MyApp : Application() {
         return database
     }
 
+    fun closeDatabase() {
+        database?.close()
+        database = null
+    }
+
+
 
 
 
