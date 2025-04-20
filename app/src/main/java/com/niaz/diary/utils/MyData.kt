@@ -6,5 +6,4 @@ object MyData {
     var iTitle = 0
     var titleEntities: MutableList<TitleEntity> = ArrayList()
     var date:String = ""
-//    var nextId = 0
 }

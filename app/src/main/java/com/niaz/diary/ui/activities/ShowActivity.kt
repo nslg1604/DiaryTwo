@@ -1,81 +1,58 @@
 package com.niaz.diary.ui.activities
 
-import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.niaz.diary.db.NoteEntity
-import com.niaz.diary.utils.MyConst
-import com.niaz.diary.utils.MyData
-import com.niaz.diary.utils.MyLogger
-import com.niaz.diary.viewmodel.ShowViewModel
 import com.niaz.diary.R
+import com.niaz.diary.db.NoteEntity
+import com.niaz.diary.utils.*
+import com.niaz.diary.viewmodel.ShowViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ShowActivity : ComponentActivity() {
     private val viewModel: ShowViewModel by viewModels()
-//    private var mode:String = MyConst.MODE_TABLE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MyLogger.d("ShowActivity - iTitle=" + MyData.iTitle + "/" + MyData.titleEntities.get(MyData.iTitle).id)
+        MyLogger.d("ShowActivity - iTitle=${MyData.iTitle}/${MyData.titleEntities[MyData.iTitle].id}")
         setContent {
-            ShowScreen(
-                viewModel
-            )
+            ShowScreen(viewModel)
         }
     }
 
     @Composable
     fun ShowScreen(viewModel: ShowViewModel) {
         var offsetTitle by remember { mutableStateOf(MyData.iTitle) }
-        var myNotes: MutableList<NoteEntity> by remember { mutableStateOf(ArrayList()) }
+        var myNotes by remember { mutableStateOf<MutableList<NoteEntity>>(mutableListOf()) }
         var mode by remember { mutableStateOf(MyConst.MODE_TABLE) }
+
+        val graphBitmap by viewModel.graphBitmap.collectAsState()
 
         LaunchedEffect(offsetTitle) {
             viewModel.readMyNotes(MyData.titleEntities[offsetTitle].id).collect { newMyNotes ->
-                myNotes = newMyNotes!!
-                MyLogger.d("ShowActivity - LaunchedEffect offsetTitle=" + offsetTitle + " size=" + myNotes.size)
+                newMyNotes?.let {
+                    myNotes = it
+                    MyLogger.d("ShowActivity - Loaded notes: ${it.size}")
+                }
             }
         }
 
@@ -92,13 +69,9 @@ class ShowActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            ShowInfo(
-                MyConst.INFO_TITLES,
-                viewModel,
-                offsetTitle,
-                onOffsetChange = { newOffset ->
-                    offsetTitle = newOffset
-                })
+            ShowInfo(MyConst.INFO_TITLES, viewModel, offsetTitle) { newOffset ->
+                offsetTitle = newOffset
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -109,26 +82,23 @@ class ShowActivity : ComponentActivity() {
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Buttons
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(5.dp)
-                        .background(Color.White)
-                        .padding(10.dp),
+                        .padding(5.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-
                     IconButton(
-                        onClick = {
-                            mode = MyConst.MODE_TABLE
-                            MyLogger.d("ShowActivity mode=$mode")
-                        },
+                        onClick = { mode = MyConst.MODE_TABLE },
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color.LightGray)
+                            .background(Color.White)
+                            .border(
+                                width = if (mode == MyConst.MODE_TABLE) 3.dp else 1.dp,
+                                color = if (mode == MyConst.MODE_TABLE) Color.DarkGray else Color.Gray,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .padding(5.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_table_view_24),
@@ -136,48 +106,75 @@ class ShowActivity : ComponentActivity() {
                             modifier = Modifier.size(48.dp)
                         )
                     }
+
                     Spacer(modifier = Modifier.width(10.dp))
 
                     IconButton(
-                        onClick = {
-                            mode = MyConst.MODE_GRAPH
-                            MyLogger.d("ShowActivity mode=$mode")
-                        },
+                        onClick = { mode = MyConst.MODE_GRAPH },
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-//                            .background(Color.White)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color.LightGray)
+                            .background(Color.White)
+                            .border(
+                                width = if (mode == MyConst.MODE_GRAPH) 3.dp else 1.dp,
+                                color = if (mode == MyConst.MODE_GRAPH) Color.DarkGray else Color.Gray,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .padding(5.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_graph_right),
-                            contentDescription = "graph emulation",
-                            modifier = Modifier
-//                                .size(48.dp)
-                                .fillMaxWidth()
+                            contentDescription = "graph icon",
+                            modifier = Modifier.size(48.dp)
                         )
                     }
                 }
 
-                if (mode.equals(MyConst.MODE_TABLE)) {
+////////////////////////
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(5.dp)
+//                        .background(Color.White)
+//                        .padding(10.dp),
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    IconButton(
+//                        onClick = { mode = MyConst.MODE_TABLE },
+//                        modifier = Modifier
+//                            .clip(RoundedCornerShape(10.dp))
+//                            .background(Color.LightGray)
+//                    ) {
+//                        Icon(
+//                            painter = painterResource(id = R.drawable.baseline_table_view_24),
+//                            contentDescription = "table icon",
+//                            modifier = Modifier.size(48.dp)
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.width(10.dp))
+//
+//                    IconButton(
+//                        onClick = { mode = MyConst.MODE_GRAPH },
+//                        modifier = Modifier
+//                            .clip(RoundedCornerShape(10.dp))
+//                            .background(Color.LightGray)
+//                    ) {
+//                        Icon(
+//                            painter = painterResource(id = R.drawable.ic_graph_right),
+//                            contentDescription = "graph icon",
+//                            modifier = Modifier.fillMaxWidth()
+//                        )
+//                    }
+//                }
 
-                    //Notes
-                    for (i in 0 until myNotes.size) {
-                        var myNote = myNotes.get(i)
-                        ShowMyNote(myNote)
-                    }
+                if (mode == MyConst.MODE_TABLE) {
+                    myNotes.forEach { ShowMyNote(it) }
                 } else {
-                    // todo graph calculation needed
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_graph_emulation),
-                        contentDescription = "my graph",
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        contentScale = ContentScale.FillWidth
-                    )
+                    graphBitmap?.let {
+                        GraphImage(graphBitmap = it)
+                    }
                 }
             }
-
         }
     }
 
@@ -193,27 +190,20 @@ class ShowActivity : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = myNote.date!!,
+                text = myNote.date ?: "",
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             )
-
             Spacer(modifier = Modifier.width(10.dp))
-
             Text(
-                text = myNote.note!!,
+                text = myNote.note ?: "",
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             )
-
-
         }
     }
-
 
     @Composable
     fun ShowInfo(
@@ -222,9 +212,7 @@ class ShowActivity : ComponentActivity() {
         offset: Int,
         onOffsetChange: (Int) -> Unit
     ) {
-        MyLogger.d(".....ShowData " + infoType)
         Spacer(modifier = Modifier.height(10.dp))
-
         Row(
             modifier = Modifier
                 .height(80.dp)
@@ -241,19 +229,13 @@ class ShowActivity : ComponentActivity() {
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
                     .clickable {
-                        var newOffset = offset
                         if (infoType == MyConst.INFO_TITLES && offset > 0) {
-                            newOffset -= 1
-                            onOffsetChange(newOffset)
+                            onOffsetChange(offset - 1)
                         }
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "<",
-                    fontSize = 26.sp,
-                    textAlign = TextAlign.Center
-                )
+                Text("<", fontSize = 26.sp, textAlign = TextAlign.Center)
             }
 
             Spacer(modifier = Modifier.width(10.dp))
@@ -274,23 +256,29 @@ class ShowActivity : ComponentActivity() {
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
                     .clickable {
-                        var newOffset = offset
                         if (infoType == MyConst.INFO_TITLES && offset < MyData.titleEntities.size - 1) {
-                            MyLogger.d("ShowActivity - right")
-                            newOffset += 1
-                            onOffsetChange(newOffset)
+                            onOffsetChange(offset + 1)
                         }
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = ">",
-                    fontSize = 26.sp,
-                    textAlign = TextAlign.Center
-                )
+                Text(">", fontSize = 26.sp, textAlign = TextAlign.Center)
             }
         }
-        MyLogger.d("ShowActivity - ShowData infoType=$infoType offset=$offset")
     }
 
+    @Composable
+    fun GraphImage(graphBitmap: Bitmap) {
+        Image(
+            bitmap = graphBitmap.asImageBitmap(),
+            contentDescription = "my graph",
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(
+                    min = 0.dp,
+                    max = (LocalContext.current.resources.displayMetrics.heightPixels / 2).dp
+                ),
+            contentScale = ContentScale.FillWidth
+        )
+    }
 }

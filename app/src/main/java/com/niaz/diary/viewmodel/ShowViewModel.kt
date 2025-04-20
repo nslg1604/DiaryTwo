@@ -1,39 +1,37 @@
 package com.niaz.diary.viewmodel
 
-
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import com.niaz.diary.db.DbTools
 import com.niaz.diary.db.NoteEntity
-import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyCalendar
 import com.niaz.diary.utils.MyConst
+import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
+import com.niaz.diary.utils.GraphBuilder
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import java.util.Calendar
+import kotlinx.coroutines.flow.*
+import java.util.*
+import javax.inject.Inject
 
-class ShowViewModel : ViewModel() {
+@HiltViewModel
+class ShowViewModel @Inject constructor(): ViewModel() {
     private val dbTools = DbTools()
-    private val myCalendar = MyCalendar()
     private var calendar = Calendar.getInstance()
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is EditViewModel"
-    }
-    val text: LiveData<String> = _text
+    @Inject lateinit var myCalendar: MyCalendar
+    @Inject lateinit var graphBuilder: GraphBuilder
 
-    private val _note = MutableStateFlow("")
-    val note: StateFlow<String> = _note.asStateFlow()
+    private val _graphBitmap = MutableStateFlow<Bitmap?>(null)
+    val graphBitmap: StateFlow<Bitmap?> get() = _graphBitmap
 
-    fun readMyNotes(titleId:Int): Flow<MutableList<NoteEntity>?> = flow {
-        dbTools.loadNotesAll() // for debug
-        val myNotes = dbTools.loadNotesByTitleId(titleId)
+    var myNotes: MutableList<NoteEntity>? = null
+        private set
+
+    fun readMyNotes(titleId: Int): Flow<MutableList<NoteEntity>?> = flow {
+        dbTools.loadNotesAll() // для отладки
+        myNotes = dbTools.loadNotesByTitleId(titleId)
+        _graphBitmap.value = graphBuilder.buildGraph(myNotes ?: emptyList())
         emit(myNotes)
     }.flowOn(Dispatchers.IO)
 
@@ -46,21 +44,17 @@ class ShowViewModel : ViewModel() {
 
     fun getInfo(infoType: String, offset: Int): String {
         MyLogger.d("EditViewModel - getInfo infoType=$infoType offset=$offset")
-        if (infoType.equals(MyConst.INFO_CALENDAR)) {
-            var calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_MONTH, offset)
-            val date = getDate(calendar)
-            MyLogger.d("EditViewModel - getInfo date=$date")
-            return date
+        return when (infoType) {
+            MyConst.INFO_CALENDAR -> {
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.DAY_OF_MONTH, offset)
+                getDate(calendar)
+            }
+            MyConst.INFO_TITLES -> {
+                MyData.iTitle = offset
+                MyData.titleEntities[offset].title
+            }
+            else -> ""
         }
-        if (infoType.equals(MyConst.INFO_TITLES)) {
-            MyData.iTitle = offset
-            val title = MyData.titleEntities.get(MyData.iTitle).title
-            MyLogger.d("EditViewModel - getInfo data=$title")
-            return title!!
-        }
-        return ""
     }
-
-
 }

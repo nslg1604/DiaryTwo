@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Diary</string>
+    <string name="app_name">Графический дневник</string>
     <string name="diary">Дневник</string>
     <string name="my_title">Активности</string>
     <string name="new_title">Новая активность</string>
@@ -12,9 +12,10 @@
     <string name="enter_value">"Введите значение"</string>
     <string name="history">История</string>
     <string name="title_1">Вес, кг</string>
-    <string name="title_2">Пробежка, мин</string>
-    <string name="title_3">Велосипед, км</string>
-    <string name="title_4">Температура на улице</string>
+    <string name="title_2">Велосипед, км</string>
+    <string name="title_3">Заправка, км</string>
+    <string name="title_4">Заправка, литры</string>
+    <string name="title_5">Тест</string>
     <string name="export_db">Экспорт базы данных</string>
     <string name="import_db">Импорт базы данных</string>
     <string name="about">О программе</string>

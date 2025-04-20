@@ -3,16 +3,16 @@ package com.niaz.diary.utils
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import javax.inject.Inject
 
 
-class MyCalendar () {
+class MyCalendar @Inject constructor() {
     var daysOfWeek = arrayOf("понедельник", "вторник", "среда", "четверг",
         "пятница", "суббота", "воскресенье")
     var daysOfWeekShort = arrayOf("пн", "вт", "ср", "чт",
         "пт", "сб", "вс")
     var months = arrayOf("января","февраля","марта","апреля","мая","июня",
         "июля","августа","сентября","октября","ноября","декабря")
-
 
     fun calendarToDD_MM_YYYY(calendar: Calendar?): String {
         if (calendar == null){
@@ -80,7 +80,6 @@ class MyCalendar () {
         val df = SimpleDateFormat("dd && yyyy")
         var formattedDate = df.format(calendar.time)
         var month:Int = calendar.get(Calendar.MONTH)
-//        MyLogger.d("MyCalendar - calendarToDDMMMYYYY month=" + month)
         if (month < 12) {
             formattedDate = formattedDate.replace("&&", months[month])
         }
@@ -130,12 +129,4 @@ class MyCalendar () {
 
     }
 
-//    /* По указанной дате получаем день недели*/
-//    fun getDayOfWeek(date: LocalDate): String {
-//        val dayOfWeek = date.dayOfWeek
-//        println("dayOfWeek.toString()$dayOfWeek")
-//        val localeRu = Locale("ru", "RU")
-//
-//        return dayOfWeek.getDisplayName(TextStyle.FULL, localeRu)
-//    }
 }

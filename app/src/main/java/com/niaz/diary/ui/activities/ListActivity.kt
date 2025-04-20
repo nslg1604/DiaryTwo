@@ -41,6 +41,13 @@ import com.niaz.diary.R
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.ui.platform.LocalContext
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.niaz.diary.utils.MyPermissions
+
 @AndroidEntryPoint
 class ListActivity : ComponentActivity() {
     private val viewModel: ListViewModel by viewModels()
@@ -473,6 +480,7 @@ fun MyMenu(viewModel: ListViewModel){
     var showMenu by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val activity = context as Activity
     MyLogger.d("ListActivity - myMenu")
 
     val importLauncher = rememberLauncherForActivityResult(
@@ -503,7 +511,12 @@ fun MyMenu(viewModel: ListViewModel){
             DropdownMenuItem(
                 onClick = {
                     showMenu = false
-                    viewModel.onExportDatabase()
+                    val myPermissions = MyPermissions()
+                    val granted = myPermissions
+                        .checkAndRequestWritePermission(activity, 1)
+                    if (granted) {
+                        viewModel.onExportDatabase()
+                    }
                 },
                 text = {
                     Text(stringResource(R.string.export_db))

@@ -33,7 +33,7 @@ class ListViewModel @Inject constructor(
     private val _titleEntities = MutableStateFlow<List<TitleEntity>>(emptyList())
     val titleEntities: StateFlow<List<TitleEntity>> = _titleEntities
 
-    private var _message = MutableStateFlow<String>("")
+    private var _message = MutableStateFlow("")
     val message: StateFlow<String> = _message.asStateFlow()
 
     fun readTitleEntitiesFromDatabaseAsync() {
@@ -177,15 +177,17 @@ class ListViewModel @Inject constructor(
             _message.value = context.resources.getString(R.string.db_not_found, MyConst.DB_NAME)
             return
         }
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        if (!downloadsDir.exists()) {
-            downloadsDir.mkdirs()
+        val destDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        if (!destDir.exists()) {
+            destDir.mkdirs()
         }
-
-        val destinationFile = File(downloadsDir, MyConst.DB_NAME)
         val destPath = "/" + Environment.DIRECTORY_DOWNLOADS + "/" + MyConst.DB_NAME
+        val destFile = File(destDir, MyConst.DB_NAME)
+        if (destFile.exists()){
+            destFile.delete()
+        }
         try {
-            databasePath.copyTo(destinationFile, overwrite = true)
+            databasePath.copyTo(destFile, overwrite = true)
             MyLogger.d("ListViewModel - onExportDatabase - exported")
             _message.value = context.resources.getString(R.string.db_exported, destPath)
         } catch (e: Exception) {

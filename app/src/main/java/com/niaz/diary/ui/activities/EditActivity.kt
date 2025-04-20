@@ -29,8 +29,9 @@ import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
 import com.niaz.diary.viewmodel.EditViewModel
 import com.niaz.diary.R
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class EditActivity : ComponentActivity() {
     private val viewModel: EditViewModel by viewModels()
 
@@ -49,10 +50,6 @@ class EditActivity : ComponentActivity() {
         var offsetTitle by remember { mutableStateOf(MyData.iTitle) }
         var offsetCalendar by remember { mutableStateOf(0) }
         var note by remember { mutableStateOf("") }
-
-//        BackHandler() {
-//            MyLogger.d("EditActivity - back")
-//        }
 
         LaunchedEffect(offsetTitle, offsetCalendar) {
             viewModel.readNote().collect { newNote ->
@@ -218,7 +215,6 @@ class EditActivity : ComponentActivity() {
                 )
             }
         }
-
     }
 
 

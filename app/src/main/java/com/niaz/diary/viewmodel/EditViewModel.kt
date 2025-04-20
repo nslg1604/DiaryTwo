@@ -10,6 +10,7 @@ import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyCalendar
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyLogger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,18 +20,15 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import javax.inject.Inject
 
-class EditViewModel : ViewModel() {
+@HiltViewModel
+class EditViewModel @Inject constructor() : ViewModel() {
     private val dbTools = DbTools()
-    private val myCalendar = MyCalendar()
     private var calendar = Calendar.getInstance()
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is EditViewModel"
-    }
-    val text: LiveData<String> = _text
-
     private val _note = MutableStateFlow("")
     val note: StateFlow<String> = _note.asStateFlow()
+    @Inject lateinit var myCalendar: MyCalendar
 
     fun readNote(): Flow<String> = flow {
         MyLogger.d("EditViewModel - readNote iTitle=" + MyData.iTitle + "/" + MyData.titleEntities.get(MyData.iTitle).id + " date=" + MyData.date)
