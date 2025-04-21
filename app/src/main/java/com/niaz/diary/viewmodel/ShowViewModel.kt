@@ -29,7 +29,7 @@ class ShowViewModel @Inject constructor(): ViewModel() {
         private set
 
     fun readMyNotes(titleId: Int): Flow<MutableList<NoteEntity>?> = flow {
-        dbTools.loadNotesAll() // для отладки
+//        dbTools.loadNotesAll() // debug
         myNotes = dbTools.loadNotesByTitleId(titleId)
         _graphBitmap.value = graphBuilder.buildGraph(myNotes ?: emptyList())
         emit(myNotes)

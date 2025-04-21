@@ -40,13 +40,7 @@ import com.niaz.diary.viewmodel.ListViewModel
 import com.niaz.diary.R
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.ui.platform.LocalContext
-
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.niaz.diary.utils.MyPermissions
+import com.niaz.diary.utils.MyConst
 
 @AndroidEntryPoint
 class ListActivity : ComponentActivity() {
@@ -480,7 +474,6 @@ fun MyMenu(viewModel: ListViewModel){
     var showMenu by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val activity = context as Activity
     MyLogger.d("ListActivity - myMenu")
 
     val importLauncher = rememberLauncherForActivityResult(
@@ -493,6 +486,15 @@ fun MyMenu(viewModel: ListViewModel){
         }
     }
 
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                viewModel.exportDatabaseFromUri(context, uri)
+            }
+        }
+    }
 
     Box {
         IconButton(onClick = {
@@ -507,16 +509,15 @@ fun MyMenu(viewModel: ListViewModel){
             onDismissRequest = { showMenu = false },
             modifier = Modifier.wrapContentSize()
         ) {
-
             DropdownMenuItem(
                 onClick = {
                     showMenu = false
-                    val myPermissions = MyPermissions()
-                    val granted = myPermissions
-                        .checkAndRequestWritePermission(activity, 1)
-                    if (granted) {
-                        viewModel.onExportDatabase()
+                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/octet-stream"
+                        putExtra(Intent.EXTRA_TITLE, MyConst.DB_NAME)
                     }
+                    exportLauncher.launch(intent)
                 },
                 text = {
                     Text(stringResource(R.string.export_db))
@@ -526,7 +527,6 @@ fun MyMenu(viewModel: ListViewModel){
             DropdownMenuItem(
                 onClick = {
                     showMenu = false
-//                    viewModel.onImportDatabase()
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "*/*"
@@ -553,5 +553,4 @@ fun MyMenu(viewModel: ListViewModel){
         AboutDialog(onDismiss = { showAboutDialog = false })
     }
 }
-
 

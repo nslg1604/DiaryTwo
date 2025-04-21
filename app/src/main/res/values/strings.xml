@@ -24,7 +24,7 @@
     <string name="db_not_found">База данных не найдена:\n%s</string>
     <string name="db_exported">База данных экспортирована в\n%s</string>
     <string name="db_export_error">Ошибка экспорта базы данных в\n%s</string>
-    <string name="db_imported">База данных импортирована в\n%s</string>
-    <string name="db_import_error">Ошибка импорта базы данных в\n%s</string>
+    <string name="db_imported">База данных импортирована из\n%s</string>
+    <string name="db_import_error">Ошибка импорта базы данных из\n%s</string>
     <string name="z"></string>
 </resources>

@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -168,6 +169,10 @@ class ListViewModel @Inject constructor(
         _message.value = ""
     }
 
+    fun setMessage(newMessage:String){
+        _message.value = newMessage
+    }
+
     fun onExportDatabase() {
         MyLogger.d("ListViewModel - onExportDatabase")
         val databasePath = context.getDatabasePath(MyConst.DB_NAME)
@@ -178,20 +183,41 @@ class ListViewModel @Inject constructor(
             return
         }
         val destDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        if (!destDir.exists()) {
-            destDir.mkdirs()
-        }
         val destPath = "/" + Environment.DIRECTORY_DOWNLOADS + "/" + MyConst.DB_NAME
+//        if (!destDir.exists()) {
+//            destDir.mkdirs()
+//        }
         val destFile = File(destDir, MyConst.DB_NAME)
         if (destFile.exists()){
+            MyLogger.d("ListViewModel - onExportDatabase - destFile.exists=true" )
             destFile.delete()
         }
+        MyLogger.d("ListViewModel - onExportDatabase - destFile.exists=" + destFile.exists())
         try {
             databasePath.copyTo(destFile, overwrite = true)
             MyLogger.d("ListViewModel - onExportDatabase - exported")
-            _message.value = context.resources.getString(R.string.db_exported, destPath)
+            _message.value = context.resources.getString(R.string.db_exported)
         } catch (e: Exception) {
             MyLogger.e("ListViewModel - onExportDatabase - error=" + e)
+            _message.value = context.resources.getString(R.string.db_exported)
+        }
+    }
+
+    fun exportDatabaseFromUri(context:Context, uri: Uri) {
+        val destPath = getFileNameFromUri(context, uri)
+        try {
+            val dbPath = File(context.filesDir.parent, "databases/${MyConst.DB_NAME}")
+            val outputStream = context.contentResolver.openOutputStream(uri)
+
+            FileInputStream(dbPath).use { input ->
+                outputStream?.use { output ->
+                    input.copyTo(output)
+                }
+            }
+            MyLogger.d("ExportDatabaseTool - db exported")
+            _message.value = context.resources.getString(R.string.db_exported, destPath)
+        } catch (e: Exception) {
+            MyLogger.e("ExportDatabaseTool - export error=$e")
             _message.value = context.resources.getString(R.string.db_export_error, destPath)
         }
     }
