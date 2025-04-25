@@ -1,4 +1,4 @@
-package com.niaz.diary.db
+package com.niaz.diary.data.note
 
 class NoteRepo(private val noteDao: NoteDao) {
     suspend fun insertNote(noteEntity: NoteEntity) {

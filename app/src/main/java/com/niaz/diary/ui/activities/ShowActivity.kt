@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.niaz.diary.R
-import com.niaz.diary.db.NoteEntity
+import com.niaz.diary.data.note.NoteEntity
 import com.niaz.diary.utils.*
 import com.niaz.diary.viewmodel.ShowViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -128,44 +128,6 @@ class ShowActivity : ComponentActivity() {
                         )
                     }
                 }
-
-////////////////////////
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(5.dp)
-//                        .background(Color.White)
-//                        .padding(10.dp),
-//                    horizontalArrangement = Arrangement.Center
-//                ) {
-//                    IconButton(
-//                        onClick = { mode = MyConst.MODE_TABLE },
-//                        modifier = Modifier
-//                            .clip(RoundedCornerShape(10.dp))
-//                            .background(Color.LightGray)
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(id = R.drawable.baseline_table_view_24),
-//                            contentDescription = "table icon",
-//                            modifier = Modifier.size(48.dp)
-//                        )
-//                    }
-//
-//                    Spacer(modifier = Modifier.width(10.dp))
-//
-//                    IconButton(
-//                        onClick = { mode = MyConst.MODE_GRAPH },
-//                        modifier = Modifier
-//                            .clip(RoundedCornerShape(10.dp))
-//                            .background(Color.LightGray)
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(id = R.drawable.ic_graph_right),
-//                            contentDescription = "graph icon",
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//                    }
-//                }
 
                 if (mode == MyConst.MODE_TABLE) {
                     myNotes.forEach { ShowMyNote(it) }

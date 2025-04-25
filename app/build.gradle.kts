@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id ("org.jetbrains.kotlin.kapt")
+    id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
 }
 
@@ -62,21 +62,36 @@ dependencies {
     // Room
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
-    implementation ("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
 
     // line below to avoid "AppDatabase_Impl does not exist"
-    kapt ("androidx.room:room-compiler:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
 
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
-    // Для поддержки ViewModel с Hilt
+    // ViewModel with Hilt
     implementation(libs.hilt.navigation.compose)
 
-//    implementation("com.google.dagger:hilt-android:2.55")
-//    kapt("com.google.dagger:hilt-android-compiler:2.55")
-//    implementation 'com.google.dagger:hilt-android:2.55'
-//    annotationProcessor 'com.google.dagger:hilt-compiler:2.55'
+    // -------------------------TESTS
+
+//    // JUnit
+//    testImplementation("junit:junit:4.13.2")
+//
+//    // AndroidX Test
+//    testImplementation("androidx.test:core:1.6.0")
+//    testImplementation("androidx.test.ext:junit:1.2.0")
+//    testImplementation("androidx.arch.core:core-testing:2.3.0")
+//
+//    // Coroutines Test
+//    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+//
+//    // MockK for Kotlin mocking
+//    testImplementation("io.mockk:mockk:1.13.9")
+//
+//    // to test Compose UI (for other tests beyond this ViewModel test)
+//    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.2")
+//    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.2")
 
 }

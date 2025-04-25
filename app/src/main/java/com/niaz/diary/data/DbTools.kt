@@ -1,12 +1,15 @@
-package com.niaz.diary.db
+package com.niaz.diary.data
 
 import com.niaz.diary.MyApp
+import com.niaz.diary.data.note.NoteEntity
+import com.niaz.diary.data.note.NoteRepo
 import com.niaz.diary.utils.MyLogger
+import javax.inject.Inject
 
-class DbTools {
+class DbTools @Inject constructor(){
     suspend fun saveNoteToDatabase(noteEntity: NoteEntity) {
         if (noteEntity.note.isNullOrEmpty()){
-            MyLogger.e("DbTools - saveNoteToDatabase EMPTY note not saved titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+            MyLogger.d("DbTools - saveNoteToDatabase EMPTY note not saved titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
             return
         }
         MyLogger.d("DbTools - saveNoteToDatabase titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
@@ -22,10 +25,10 @@ class DbTools {
 
     suspend fun updateNoteInDatabase(noteEntity: NoteEntity) {
         if (noteEntity.note.isNullOrEmpty()){
-            MyLogger.e("DbTools - updateNoteInDatabase EMPTY note not saved titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+            MyLogger.e("DbTools - updateNoteInDatabase EMPTY note not saved titleId=" + noteEntity.titleId  + " note=" + noteEntity.note + " date=" + noteEntity.date )
             return
         }
-        MyLogger.d("DbTools - updateNoteInDatabase titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
+        MyLogger.d("DbTools - updateNoteInDatabase titleId=" + noteEntity.titleId + " note=" + noteEntity.note + " date=" + noteEntity.date )
         val db = MyApp.getInstance().getDatabase()
         if (db == null) {
             MyLogger.e("DbTools - updateNoteInDatabase db=null")
@@ -71,28 +74,6 @@ class DbTools {
         MyLogger.d("DbTools - loadNotesByTitleId found notes.size=" + notes.size)
         for (noteEntity in notes){
             MyLogger.d("-- id=" + noteEntity.id + " titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
-        }
-
-        return notes
-    }
-
-    suspend fun loadNotesAll():MutableList<NoteEntity>? {
-        MyLogger.d("DbTools - loadNotesAll")
-        val db = MyApp.getInstance().getDatabase()
-        if (db == null) {
-            MyLogger.e("DbTools - loadNotes db=null")
-            return null
-        }
-        val noteDao = db.noteDao()
-        val noteRepo = NoteRepo(noteDao = noteDao)
-        val notes = noteRepo.getNotes()
-        if (notes == null){
-            MyLogger.e("DbTools - loadNotesAll not found")
-            return null
-        }
-        MyLogger.d("DbTools - loadNotesAll found notes.size=" + notes.size)
-        for (noteEntity in notes){
-            MyLogger.d("=== id=" + noteEntity.id + " titleId=" + noteEntity.titleId + " date=" + noteEntity.date + " note=" + noteEntity.note)
         }
 
         return notes

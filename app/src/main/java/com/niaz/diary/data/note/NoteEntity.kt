@@ -1,4 +1,4 @@
-package com.niaz.diary.db
+package com.niaz.diary.data.note
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -12,6 +12,7 @@ data class NoteEntity(
     @ColumnInfo(name = "title_id")
     val titleId: Int,
 
+    // format dd.MM.yyyy
     @ColumnInfo
         (name = "date") val date: String?,
 

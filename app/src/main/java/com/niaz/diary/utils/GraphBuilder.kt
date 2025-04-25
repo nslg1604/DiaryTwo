@@ -1,7 +1,7 @@
 package com.niaz.diary.utils
 
 import android.graphics.*
-import com.niaz.diary.db.NoteEntity
+import com.niaz.diary.data.note.NoteEntity
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject

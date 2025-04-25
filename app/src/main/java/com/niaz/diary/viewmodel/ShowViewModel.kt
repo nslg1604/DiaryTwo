@@ -2,8 +2,8 @@ package com.niaz.diary.viewmodel
 
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
-import com.niaz.diary.db.DbTools
-import com.niaz.diary.db.NoteEntity
+import com.niaz.diary.data.DbTools
+import com.niaz.diary.data.note.NoteEntity
 import com.niaz.diary.utils.MyCalendar
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData

@@ -2,7 +2,7 @@ package com.niaz.diary
 
 import android.app.Application
 import androidx.room.Room.databaseBuilder
-import com.niaz.diary.db.AppDatabase
+import com.niaz.diary.data.AppDatabase
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyLogger
 import dagger.hilt.android.HiltAndroidApp

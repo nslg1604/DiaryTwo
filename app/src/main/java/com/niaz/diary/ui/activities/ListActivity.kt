@@ -27,20 +27,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.niaz.diary.db.TitleEntity
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.niaz.diary.R
+import com.niaz.diary.data.title.TitleEntity
+import com.niaz.diary.mvi.list.ListIntent
+import com.niaz.diary.mvi.list.ListViewModel
+import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData
 import com.niaz.diary.utils.MyLogger
-import com.niaz.diary.viewmodel.ListViewModel
-import com.niaz.diary.R
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.compose.ui.platform.LocalContext
-import com.niaz.diary.utils.MyConst
 
 @AndroidEntryPoint
 class ListActivity : ComponentActivity() {
@@ -55,28 +57,22 @@ class ListActivity : ComponentActivity() {
 
     @Composable
     fun DiaryScreen() {
-        var addTitle by remember { mutableStateOf(false) }
-        val message by viewModel.message.collectAsState()
-        var exportImportDialog by remember { mutableStateOf(false) }
-        val titleEntities by viewModel.titleEntities.collectAsState()
+        val context = LocalContext.current
+        val state by viewModel.state.collectAsState()
 
-        LaunchedEffect(message) {
-            if (!message.isNullOrEmpty()) {
-                MyLogger.d("ListActivity - new message=" + message)
-                exportImportDialog = true
-            }
-        }
-
+        // Process intents when we first load
         LaunchedEffect(Unit) {
-            viewModel.readTitleEntitiesFromDatabaseAsync()
+            viewModel.processIntent(ListIntent.LoadTitles)
         }
 
+        // UI Components
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Header with title and menu
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -92,6 +88,7 @@ class ListActivity : ComponentActivity() {
                 MyMenu(viewModel)
             }
 
+            // List of titles
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,22 +96,21 @@ class ListActivity : ComponentActivity() {
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                titleEntities.forEachIndexed { index, titleEntity ->
-                    MyLogger.d("ListActivity index=" + index + " id=" + titleEntity.id + " title=" + titleEntity.title)
+                state.titles.forEachIndexed { index, titleEntity ->
                     ShowTitleRow(
                         iTitle = index,
                         titleEntity = titleEntity,
                         onTitleChange = { updatedEntity ->
-                            MyLogger.d("ListActivity - before update id=" + titleEntity.id + " title=" + titleEntity.title)
-                            viewModel.updateTitleInDatabaseAsync(updatedEntity)
+                            viewModel.processIntent(ListIntent.UpdateTitle(updatedEntity))
                         },
                         onDelete = {
-                            viewModel.deleteTitleInDatabaseAsync(titleEntity)
+                            viewModel.processIntent(ListIntent.DeleteTitle(titleEntity))
                         }
                     )
                 }
             }
 
+            // Add button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -129,7 +125,7 @@ class ListActivity : ComponentActivity() {
                         .background(Color.Gray)
                         .clickable(onClick = {
                             MyLogger.d("+ click")
-                            addTitle = true
+                            viewModel.processIntent(ListIntent.ShowAddTitleDialog)
                         }),
                     contentAlignment = Alignment.Center
                 ) {
@@ -142,26 +138,27 @@ class ListActivity : ComponentActivity() {
                 }
             }
 
-            if (addTitle) {
+            // Show add title dialog if needed
+            if (state.showAddTitleDialog) {
                 AddTitleDialog(
-                    onDismiss = { addTitle = false },
+                    onDismiss = { viewModel.processIntent(ListIntent.HideAddTitleDialog) },
                     onConfirm = { title ->
+                        viewModel.processIntent(ListIntent.HideAddTitleDialog)
                         val titleEntity = TitleEntity(title)
-                        MyLogger.d("ListActivity - before add id=" + titleEntity.id + " title=" + titleEntity.title)
-                        viewModel.addTitleToDatabaseAsync(titleEntity)
-                        addTitle = false
+                        viewModel.processIntent(ListIntent.AddTitle(titleEntity))
                     }
                 )
             }
 
-            if (exportImportDialog) {
+            // Show message dialog if needed
+            if (state.showMessageDialog) {
                 AlertDialog(
                     onDismissRequest = {
-                        exportImportDialog = false
+                        viewModel.processIntent(ListIntent.HideMessageDialog)
                     },
                     text = {
                         Text(
-                            text = message,
+                            text = state.message ?: "",
                             fontSize = 20.sp,
                             lineHeight = 30.sp,
                             color = Color.Black,
@@ -171,14 +168,18 @@ class ListActivity : ComponentActivity() {
                     confirmButton = {
                         Button(
                             onClick = {
-                                exportImportDialog = false
-                                viewModel.resetMessage()
+                                viewModel.processIntent(ListIntent.HideMessageDialog)
                             }
                         ) {
                             Text(stringResource(R.string.close))
                         }
                     }
                 )
+            }
+
+            // Show About Dialog if needed
+            if (state.showAboutDialog) {
+                AboutDialog(onDismiss = { viewModel.processIntent(ListIntent.HideAboutDialog) })
             }
         }
     }
@@ -190,8 +191,8 @@ class ListActivity : ComponentActivity() {
         onTitleChange: (TitleEntity) -> Unit,
         onDelete: () -> Unit
     ) {
-        var titleClicked by remember { mutableStateOf(false) }
         val context = LocalContext.current
+        val state by viewModel.state.collectAsState()
 
         Row(
             modifier = Modifier
@@ -222,7 +223,7 @@ class ListActivity : ComponentActivity() {
                 modifier = Modifier
                     .weight(1f)
                     .clickable {
-                        titleClicked = true
+                        viewModel.processIntent(ListIntent.ShowTitleMenuDialog(titleEntity))
                     }
             )
 
@@ -246,21 +247,38 @@ class ListActivity : ComponentActivity() {
             }
         }
 
-        if (titleClicked) {
+        // Show title menu dialog if needed
+        if (state.showTitleMenuDialog && state.selectedTitle == titleEntity) {
             ShowTitleMenuDialog(
                 title = titleEntity,
                 onDismissRequest = {
-                    titleClicked = false
+                    viewModel.processIntent(ListIntent.HideTitleMenuDialog)
                 },
                 onEditClick = {
-                    titleClicked = true
+                    viewModel.processIntent(ListIntent.ShowEditTitleDialog)
                 },
                 onDeleteClick = {
                     onDelete()
-                    titleClicked = false
+                    viewModel.processIntent(ListIntent.HideTitleMenuDialog)
                 },
                 onTitleChange = { newTitle ->
                     onTitleChange(titleEntity.copy(title = newTitle))
+                }
+            )
+        }
+
+        // Show edit title dialog if needed
+        if (state.showEditTitleDialog && state.selectedTitle == titleEntity) {
+            EditTitleDialog(
+                oldTitle = titleEntity.title,
+                onDismiss = {
+                    viewModel.processIntent(ListIntent.HideEditTitleDialog)
+                    viewModel.processIntent(ListIntent.HideTitleMenuDialog)
+                },
+                onConfirm = { newTitle ->
+                    onTitleChange(titleEntity.copy(title = newTitle))
+                    viewModel.processIntent(ListIntent.HideEditTitleDialog)
+                    viewModel.processIntent(ListIntent.HideTitleMenuDialog)
                 }
             )
         }
@@ -274,8 +292,6 @@ class ListActivity : ComponentActivity() {
         onDeleteClick: () -> Unit,
         onTitleChange: (String) -> Unit
     ) {
-        var showEditDialog by remember { mutableStateOf(false) }
-
         AlertDialog(
             onDismissRequest = onDismissRequest,
             title = {
@@ -291,10 +307,7 @@ class ListActivity : ComponentActivity() {
                     DialogButton(
                         icon = Icons.Filled.Edit,
                         text = "Переименовать",
-                        onClick = {
-                            onEditClick()
-                            showEditDialog = true
-                        }
+                        onClick = onEditClick
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     DialogButton(
@@ -311,26 +324,89 @@ class ListActivity : ComponentActivity() {
                 }
             }
         )
-
-        if (showEditDialog) {
-            EditTitleDialog(
-                oldTitle = title.title,
-                onDismiss = {
-                    showEditDialog = false
-                    onDismissRequest()
-                },
-                onConfirm = { newTitle ->
-                    onTitleChange(newTitle)
-                    showEditDialog = false
-                    onDismissRequest()
-                }
-            )
-        }
     }
 
+    @Composable
+    fun MyMenu(viewModel: ListViewModel) {
+        val context = LocalContext.current
+        val state by viewModel.state.collectAsState()
+        MyLogger.d("ListActivity - myMenu")
 
+        val importLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    viewModel.processIntent(ListIntent.ImportDatabase(uri, context))
+                }
+            }
+        }
+
+        val exportLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    viewModel.processIntent(ListIntent.ExportDatabase(uri, context))
+                }
+            }
+        }
+
+        Box {
+            IconButton(onClick = {
+                viewModel.processIntent(ListIntent.ToggleMenu)
+                MyLogger.d("ListActivity - myMenu - onClick show=" + state.showMenu)
+            }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+            }
+
+            DropdownMenu(
+                expanded = state.showMenu,
+                onDismissRequest = { viewModel.processIntent(ListIntent.HideMenu) },
+                modifier = Modifier.wrapContentSize()
+            ) {
+                DropdownMenuItem(
+                    onClick = {
+                        viewModel.processIntent(ListIntent.HideMenu)
+                        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/octet-stream"
+                            putExtra(Intent.EXTRA_TITLE, MyConst.DB_NAME)
+                        }
+                        exportLauncher.launch(intent)
+                    },
+                    text = {
+                        Text(stringResource(R.string.export_db))
+                    }
+                )
+
+                DropdownMenuItem(
+                    onClick = {
+                        viewModel.processIntent(ListIntent.HideMenu)
+                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "*/*"
+                        }
+                        importLauncher.launch(intent)
+                    },
+                    text = {
+                        Text(stringResource(R.string.import_db))
+                    }
+                )
+
+                DropdownMenuItem(
+                    onClick = {
+                        viewModel.processIntent(ListIntent.HideMenu)
+                        viewModel.processIntent(ListIntent.ShowAboutDialog)
+                    },
+                    text = {
+                        Text(stringResource(R.string.about))
+                    }
+                )
+            }
+        }
+    }
 }
-
 
 @Composable
 fun DialogButton(
@@ -407,7 +483,7 @@ fun EditTitleDialog(
         }
     )
 }
-////////////////////////////////////////////
+
 @Composable
 fun AboutDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
@@ -433,7 +509,6 @@ fun AboutDialog(onDismiss: () -> Unit) {
                 Text(stringResource(R.string.close))
             }
         }
-
     )
 }
 
@@ -468,89 +543,3 @@ fun AddTitleDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
         }
     )
 }
-
-@Composable
-fun MyMenu(viewModel: ListViewModel){
-    var showMenu by remember { mutableStateOf(false) }
-    var showAboutDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    MyLogger.d("ListActivity - myMenu")
-
-    val importLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                viewModel.importDatabaseFromUri(context, uri)
-            }
-        }
-    }
-
-    val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                viewModel.exportDatabaseFromUri(context, uri)
-            }
-        }
-    }
-
-    Box {
-        IconButton(onClick = {
-            showMenu = !showMenu
-            MyLogger.d("ListActivity - myMenu - onClick show=" + showMenu)
-        }) {
-            Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-        }
-
-        DropdownMenu(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false },
-            modifier = Modifier.wrapContentSize()
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    showMenu = false
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/octet-stream"
-                        putExtra(Intent.EXTRA_TITLE, MyConst.DB_NAME)
-                    }
-                    exportLauncher.launch(intent)
-                },
-                text = {
-                    Text(stringResource(R.string.export_db))
-                }
-            )
-
-            DropdownMenuItem(
-                onClick = {
-                    showMenu = false
-                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "*/*"
-                    }
-                    importLauncher.launch(intent)
-                },
-                text = {
-                    Text(stringResource(R.string.import_db))
-                }
-            )
-
-            DropdownMenuItem(
-                onClick = {
-                    showMenu = false
-                    showAboutDialog = true
-                },
-                text = {
-                    Text(stringResource(R.string.about))
-                }
-            )
-        }
-    }
-    if (showAboutDialog) {
-        AboutDialog(onDismiss = { showAboutDialog = false })
-    }
-}
-

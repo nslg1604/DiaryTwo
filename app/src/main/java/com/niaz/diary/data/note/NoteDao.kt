@@ -1,4 +1,4 @@
-package com.niaz.diary.db
+package com.niaz.diary.data.note
 
 import androidx.room.Dao
 import androidx.room.Insert
