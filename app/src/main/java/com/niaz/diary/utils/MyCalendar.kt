@@ -4,7 +4,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import javax.inject.Inject
-
+import timber.log.Timber
 
 class MyCalendar @Inject constructor() {
     var daysOfWeek = arrayOf("понедельник", "вторник", "среда", "четверг",
@@ -41,7 +41,7 @@ class MyCalendar @Inject constructor() {
         try {
             calendar.time = sdf.parse(dateStr)
         } catch (e: ParseException) {
-            MyLogger.e("MyCalendar - dateYYYYMMDDtoCalendar error=$e")
+            Timber.e("MyCalendar - dateYYYYMMDDtoCalendar error=$e")
             calendar = null
         }
         return calendar
@@ -57,7 +57,7 @@ class MyCalendar @Inject constructor() {
         try {
             calendar.time = sdf.parse(dateStr)
         } catch (e: ParseException) {
-            MyLogger.e("MyCalendar - dateYYYYMMDDHHMMSStoCalendar error=$e")
+            Timber.e("MyCalendar - dateYYYYMMDDHHMMSStoCalendar error=$e")
             calendar = null
         }
         return calendar

@@ -11,6 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import timber.log.Timber
 import javax.inject.Singleton
 
 @Module
@@ -40,4 +41,14 @@ object AppModule {
     fun provideTitleRepository(titleDao: TitleDao): TitleRepo {
         return TitleRepoImpl(titleDao)
     }
+
+//    @Provides
+//    @Singleton
+//    fun provideTimber(): Timber.Tree = object : Timber.DebugTree() {
+//        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+//            super.log(priority, "MY_APP_$tag", message, t)
+//        }
+//    }
+
+
 }

@@ -4,19 +4,24 @@ import android.app.Application
 import androidx.room.Room.databaseBuilder
 import com.niaz.diary.data.AppDatabase
 import com.niaz.diary.utils.MyConst
-import com.niaz.diary.utils.MyLogger
+import com.niaz.diary.utils.MyDebugTree
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 
 @HiltAndroidApp
 class MyApp : Application() {
     private var database: AppDatabase? = null
 
+//    @Inject lateinit var timberTree: Timber.Tree
+
     override fun onCreate() {
         super.onCreate()
-        myApp = this.applicationContext as MyApp
-        MyLogger.d("MyApp - onCreate")
-//        setUncaughtException()
+        myApp = this
+        Timber.plant(MyDebugTree())
+//        Timber.plant(timberTree)
+        Timber.d("MyApp - onCreate")
     }
+
 
     companion object {
         lateinit var myApp: MyApp
@@ -26,14 +31,14 @@ class MyApp : Application() {
     }
 
     fun createDatabase() {
-        MyLogger.d("MyApp - createDatabase")
+        Timber.d("MyApp - createDatabase")
         database = databaseBuilder(
             this,
             AppDatabase::class.java,
             MyConst.DB_NAME
         ).build()
         if (database == null){
-            MyLogger.e("MyApp - error creating database")
+            Timber.e("MyApp - error creating database")
         }
     }
 

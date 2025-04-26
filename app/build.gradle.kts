@@ -74,24 +74,14 @@ dependencies {
     // ViewModel with Hilt
     implementation(libs.hilt.navigation.compose)
 
-    // -------------------------TESTS
+    // Timber
+    implementation ("com.jakewharton.timber:timber:5.0.1")
 
-//    // JUnit
-//    testImplementation("junit:junit:4.13.2")
-//
-//    // AndroidX Test
-//    testImplementation("androidx.test:core:1.6.0")
-//    testImplementation("androidx.test.ext:junit:1.2.0")
-//    testImplementation("androidx.arch.core:core-testing:2.3.0")
-//
-//    // Coroutines Test
-//    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
-//
-//    // MockK for Kotlin mocking
-//    testImplementation("io.mockk:mockk:1.13.9")
-//
-//    // to test Compose UI (for other tests beyond this ViewModel test)
-//    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.2")
-//    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.2")
+    // -------------------------TESTS
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("io.mockk:mockk:1.13.9")
+//    testImplementation("app.cash.turbine:turbine:1.0.0")
+//    testImplementation("androidx.arch.core:core-testing:2.2.0")
 
 }

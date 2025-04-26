@@ -41,8 +41,8 @@ import com.niaz.diary.mvi.list.ListIntent
 import com.niaz.diary.mvi.list.ListViewModel
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData
-import com.niaz.diary.utils.MyLogger
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ListActivity : ComponentActivity() {
@@ -124,7 +124,7 @@ class ListActivity : ComponentActivity() {
                         .clip(CircleShape)
                         .background(Color.Gray)
                         .clickable(onClick = {
-                            MyLogger.d("+ click")
+                            Timber.d("+ click")
                             viewModel.processIntent(ListIntent.ShowAddTitleDialog)
                         }),
                     contentAlignment = Alignment.Center
@@ -330,7 +330,7 @@ class ListActivity : ComponentActivity() {
     fun MyMenu(viewModel: ListViewModel) {
         val context = LocalContext.current
         val state by viewModel.state.collectAsState()
-        MyLogger.d("ListActivity - myMenu")
+        Timber.d("ListActivity - myMenu")
 
         val importLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
@@ -355,7 +355,7 @@ class ListActivity : ComponentActivity() {
         Box {
             IconButton(onClick = {
                 viewModel.processIntent(ListIntent.ToggleMenu)
-                MyLogger.d("ListActivity - myMenu - onClick show=" + state.showMenu)
+                Timber.d("ListActivity - myMenu - onClick show=" + state.showMenu)
             }) {
                 Icon(Icons.Default.MoreVert, contentDescription = "Menu")
             }
@@ -451,7 +451,7 @@ fun EditTitleDialog(
     onConfirm: (String) -> Unit
 ) {
     var text by remember { mutableStateOf(TextFieldValue(oldTitle)) }
-    MyLogger.d("EditTitleDialog")
+    Timber.d("EditTitleDialog")
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -466,7 +466,7 @@ fun EditTitleDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    MyLogger.d("TitleDialog confirm: ${text.text}")
+                    Timber.d("TitleDialog confirm: ${text.text}")
                     onConfirm(text.text)
                 }
             ) {
@@ -475,7 +475,7 @@ fun EditTitleDialog(
         },
         dismissButton = {
             Button(onClick = {
-                MyLogger.d("TitleDialog dismissed")
+                Timber.d("TitleDialog dismissed")
                 onDismiss()
             }) {
                 Text(stringResource(R.string.cancel))

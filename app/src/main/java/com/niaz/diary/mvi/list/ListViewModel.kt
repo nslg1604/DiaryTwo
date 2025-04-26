@@ -10,7 +10,7 @@ import com.niaz.diary.R
 import com.niaz.diary.data.title.TitleEntity
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData
-import com.niaz.diary.utils.MyLogger
+import timber.log.Timber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -121,19 +121,19 @@ class ListViewModel @Inject constructor(
     }
 
     private fun loadTitlesAsync() {
-        MyLogger.d("ListViewModel - loadTitlesAsync")
+        Timber.d("ListViewModel - loadTitlesAsync")
         viewModelScope.launch {
             try {
                 loadTitles()
             } catch (e: Exception) {
-                MyLogger.d("Error loading titles: ${e.message}")
+                Timber.d("Error loading titles: ${e.message}")
                 showMessage("Error loading titles: ${e.message}")
             }
         }
     }
 
     suspend fun loadTitles() {
-        MyLogger.d("ListViewModel - loadTitles")
+        Timber.d("ListViewModel - loadTitles")
         var titles = titleRepo.getTitles()
         if (titles.isEmpty()) {
             initTitleEntities()
@@ -144,13 +144,13 @@ class ListViewModel @Inject constructor(
     }
 
     private fun addTitleAsync(title: TitleEntity) {
-        MyLogger.d("ListViewModel - addTitleAsync title=" + title.title)
+        Timber.d("ListViewModel - addTitleAsync title=" + title.title)
         viewModelScope.launch {
             try {
                 titleRepo.insertTitle(title)
                 loadTitlesAsync() // Refresh the list
             } catch (e: Exception) {
-                MyLogger.d("Error adding title: ${e.message}")
+                Timber.d("Error adding title: ${e.message}")
                 showMessage("Error adding title: ${e.message}")
             }
         }
@@ -162,7 +162,7 @@ class ListViewModel @Inject constructor(
                 titleRepo.updateTitle(title)
                 loadTitlesAsync() // Refresh the list
             } catch (e: Exception) {
-                MyLogger.d("Error updating title: ${e.message}")
+                Timber.d("Error updating title: ${e.message}")
                 showMessage("Error updating title: ${e.message}")
             }
         }
@@ -174,7 +174,7 @@ class ListViewModel @Inject constructor(
                 titleRepo.deleteTitle(title)
                 loadTitlesAsync() // Refresh the list
             } catch (e: Exception) {
-                MyLogger.d("Error deleting title: ${e.message}")
+                Timber.d("Error deleting title: ${e.message}")
                 showMessage("Error deleting title: ${e.message}")
             }
         }
@@ -189,7 +189,7 @@ class ListViewModel @Inject constructor(
 //                showMessage(message)
 //                loadTitlesAsync() // Refresh the list after import
 //            } catch (e: Exception) {
-//                MyLogger.d("Error importing database: ${e.message}")
+//                Timber.d("Error importing database: ${e.message}")
 //                showMessage("Error importing database: ${e.message}")
 //            }
 //        }
@@ -203,7 +203,7 @@ class ListViewModel @Inject constructor(
 //                val message = "Database exported successfully"
 //                showMessage(message)
 //            } catch (e: Exception) {
-//                MyLogger.d("Error exporting database: ${e.message}")
+//                Timber.d("Error exporting database: ${e.message}")
 //                showMessage("Error exporting database: ${e.message}")
 //            }
 //        }
@@ -220,17 +220,17 @@ class ListViewModel @Inject constructor(
                     input.copyTo(output)
                 }
             }
-            MyLogger.d("ExportDatabaseTool - db exported")
+            Timber.d("ExportDatabaseTool - db exported")
             showMessage(context.resources.getString(R.string.db_exported, destPath))
         } catch (e: Exception) {
-            MyLogger.e("ExportDatabaseTool - export error=$e")
+            Timber.e("ExportDatabaseTool - export error=$e")
             showMessage(context.resources.getString(R.string.db_export_error, destPath))
         }
     }
 
     fun importDatabaseFromUri(context:Context, uri: Uri) {
         val sourcePath = getFileNameFromUri(context, uri)
-        MyLogger.d("ListViewModel - importDatabaseFromUri $sourcePath")
+        Timber.d("ListViewModel - importDatabaseFromUri $sourcePath")
         try {
             MyApp.getInstance().closeDatabase()
 
@@ -243,13 +243,13 @@ class ListViewModel @Inject constructor(
                 }
             }
 
-            MyLogger.d("ListViewModel - onImportDatabase - imported")
+            Timber.d("ListViewModel - onImportDatabase - imported")
             showMessage(context.resources.getString(R.string.db_imported, sourcePath))
 
             loadTitlesAsync()
 
         } catch (e: Exception) {
-            MyLogger.e("ListViewModel - onImportDatabase - error=" + e)
+            Timber.e("ListViewModel - onImportDatabase - error=" + e)
             showMessage(context.resources.getString(R.string.db_import_error, sourcePath))
         }
     }

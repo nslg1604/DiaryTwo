@@ -26,6 +26,7 @@ import com.niaz.diary.data.note.NoteEntity
 import com.niaz.diary.utils.*
 import com.niaz.diary.viewmodel.ShowViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ShowActivity : ComponentActivity() {
@@ -33,7 +34,7 @@ class ShowActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MyLogger.d("ShowActivity - iTitle=${MyData.iTitle}/${MyData.titleEntities[MyData.iTitle].id}")
+        Timber.d("ShowActivity - iTitle=${MyData.iTitle}/${MyData.titleEntities[MyData.iTitle].id}")
         setContent {
             ShowScreen(viewModel)
         }
@@ -51,7 +52,7 @@ class ShowActivity : ComponentActivity() {
             viewModel.readMyNotes(MyData.titleEntities[offsetTitle].id).collect { newMyNotes ->
                 newMyNotes?.let {
                     myNotes = it
-                    MyLogger.d("ShowActivity - Loaded notes: ${it.size}")
+                    Timber.d("ShowActivity - Loaded notes: ${it.size}")
                 }
             }
         }

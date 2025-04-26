@@ -7,7 +7,7 @@ import com.niaz.diary.data.note.NoteEntity
 import com.niaz.diary.utils.MyCalendar
 import com.niaz.diary.utils.MyConst
 import com.niaz.diary.utils.MyData
-import com.niaz.diary.utils.MyLogger
+import timber.log.Timber
 import com.niaz.diary.utils.GraphBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +43,7 @@ class ShowViewModel @Inject constructor(): ViewModel() {
     }
 
     fun getInfo(infoType: String, offset: Int): String {
-        MyLogger.d("EditViewModel - getInfo infoType=$infoType offset=$offset")
+        Timber.d("EditViewModel - getInfo infoType=$infoType offset=$offset")
         return when (infoType) {
             MyConst.INFO_CALENDAR -> {
                 val calendar = Calendar.getInstance()

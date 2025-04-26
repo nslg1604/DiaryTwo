@@ -27,19 +27,19 @@ class ListViewModelOld(){}
 //    }
 //
 //    suspend fun readTitleEntitiesFromDatabase():List<TitleEntity>? {
-//        MyLogger.d("ListViewModel - readTitlesFromDatabase")
+//        Timber.d("ListViewModel - readTitlesFromDatabase")
 //        val db = MyApp.getInstance().getDatabase()
 //        if (db == null) {
-//            MyLogger.e("ListViewModel - readTitlesFromDatabase db=null")
+//            Timber.e("ListViewModel - readTitlesFromDatabase db=null")
 //            return null
 //        }
 //        val titleDao = db.titleDao()
 //        val titlesRepo = TitlesRepo(titleDao = titleDao)
 //        val titleEntities = titlesRepo.getTitles()
-//        MyLogger.d("ListViewModel - readTitlesFromDatabase title.size=" + titleEntities?.size)
+//        Timber.d("ListViewModel - readTitlesFromDatabase title.size=" + titleEntities?.size)
 //
 //        titleEntities.forEach{ titleEntity ->
-//            MyLogger.d("ListViewModel - titleEntity id=${titleEntity.id} title=${titleEntity.title} ")
+//            Timber.d("ListViewModel - titleEntity id=${titleEntity.id} title=${titleEntity.title} ")
 //        }
 //        MyData.titleEntities = titleEntities
 //        return titleEntities
@@ -53,26 +53,26 @@ class ListViewModelOld(){}
 //    }
 //
 //    fun addTitleToDatabaseAsync(titleEntity:TitleEntity) {
-//        MyLogger.d("ListViewModel - addTitleToDatabaseAsync")
+//        Timber.d("ListViewModel - addTitleToDatabaseAsync")
 //        viewModelScope.launch {
 //            withContext(Dispatchers.IO) {
 //                try {
 //                    addTitleToDatabase(titleEntity)
 //                } catch (e: Exception) {
-//                    MyLogger.e("ListViewModel - addTitleToDatabaseAsync error=" + e)
+//                    Timber.e("ListViewModel - addTitleToDatabaseAsync error=" + e)
 //                }
 //            }
 //        }
 //    }
 //
 //    suspend fun addTitleToDatabase(titleEntity: TitleEntity) {
-//        MyLogger.d("ListViewModel - addTitleToDatabase")
+//        Timber.d("ListViewModel - addTitleToDatabase")
 //        val db = MyApp.getInstance().getDatabase()
 //        if (db == null) {
-//            MyLogger.e("ListViewModel - addTitleToDatabase db=null")
+//            Timber.e("ListViewModel - addTitleToDatabase db=null")
 //            return
 //        }
-//        MyLogger.d("ListViewModel - addTitlesToDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
+//        Timber.d("ListViewModel - addTitlesToDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
 //        val titleDao = db.titleDao()
 //        val titlesRepo = TitlesRepo(titleDao = titleDao)
 //        val idNew = titlesRepo.insertTitle(titleEntity) // add one title
@@ -82,7 +82,7 @@ class ListViewModelOld(){}
 //    }
 //
 //    fun updateTitleInDatabaseAsync(titleEntity:TitleEntity) {
-//        MyLogger.d("ListViewModel - updateTitleInDatabaseAsync")
+//        Timber.d("ListViewModel - updateTitleInDatabaseAsync")
 //        viewModelScope.launch {
 //            withContext(Dispatchers.IO) {
 //                try {
@@ -91,33 +91,33 @@ class ListViewModelOld(){}
 //                        oldList.map { if (it.id == titleEntity.id) titleEntity else it }
 //                    }
 //                } catch (e: Exception) {
-//                    MyLogger.e("ListViewModel - updateTitleInDatabaseAsync error=" + e)
+//                    Timber.e("ListViewModel - updateTitleInDatabaseAsync error=" + e)
 //                }
 //            }
 //        }
 //    }
 //
 //    suspend fun updateTitleInDatabase(titleEntity: TitleEntity) {
-//        MyLogger.d("ListViewModel - updateTitleInDatabase")
+//        Timber.d("ListViewModel - updateTitleInDatabase")
 //        val db = MyApp.getInstance().getDatabase()
 //        if (db == null) {
-//            MyLogger.e("ListViewModel - updateTitleInDatabase db=null")
+//            Timber.e("ListViewModel - updateTitleInDatabase db=null")
 //            return
 //        }
-//        MyLogger.d("ListViewModel - updateTitleInDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
+//        Timber.d("ListViewModel - updateTitleInDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
 //        val titleDao = db.titleDao()
 //        val titlesRepo = TitlesRepo(titleDao = titleDao)
 //        titlesRepo.updateTitle(titleEntity)
 //    }
 //
 //    suspend fun deleteTitleInDatabase(titleEntity: TitleEntity) {
-//        MyLogger.d("ListViewModel - deleteTitleInDatabase")
+//        Timber.d("ListViewModel - deleteTitleInDatabase")
 //        val db = MyApp.getInstance().getDatabase()
 //        if (db == null) {
-//            MyLogger.e("ListViewModel - deleteTitleInDatabase db=null")
+//            Timber.e("ListViewModel - deleteTitleInDatabase db=null")
 //            return
 //        }
-//        MyLogger.d("ListViewModel - deleteTitleInDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
+//        Timber.d("ListViewModel - deleteTitleInDatabase title.id=" + titleEntity.id + " title=" + titleEntity.title)
 //        val titleDao = db.titleDao()
 //        val titlesRepo = TitlesRepo(titleDao = titleDao)
 //        titlesRepo.deleteTitleEntity(titleEntity)
@@ -125,7 +125,7 @@ class ListViewModelOld(){}
 //
 //
 //    fun deleteTitleInDatabaseAsync(titleEntity:TitleEntity) {
-//        MyLogger.d("ListViewModel - deleteTitleInDatabaseAsync")
+//        Timber.d("ListViewModel - deleteTitleInDatabaseAsync")
 //        viewModelScope.launch {
 //            withContext(Dispatchers.IO) {
 //                try {
@@ -134,7 +134,7 @@ class ListViewModelOld(){}
 //                        oldList.filterNot { it.id == titleEntity.id }
 //                    }
 //                } catch (e: Exception) {
-//                    MyLogger.e("ListViewModel - deleteTitleInDatabaseAsync error=" + e)
+//                    Timber.e("ListViewModel - deleteTitleInDatabaseAsync error=" + e)
 //                }
 //            }
 //        }
@@ -149,11 +149,11 @@ class ListViewModelOld(){}
 //    }
 //
 //    fun onExportDatabase() {
-//        MyLogger.d("ListViewModel - onExportDatabase")
+//        Timber.d("ListViewModel - onExportDatabase")
 //        val databasePath = context.getDatabasePath(MyConst.DB_NAME)
 //
 //        if (!databasePath.exists()) {
-//            MyLogger.e("ListViewModel - onExportDatabase - not found")
+//            Timber.e("ListViewModel - onExportDatabase - not found")
 //            _message.value = context.resources.getString(R.string.db_not_found, MyConst.DB_NAME)
 //            return
 //        }
@@ -164,16 +164,16 @@ class ListViewModelOld(){}
 ////        }
 //        val destFile = File(destDir, MyConst.DB_NAME)
 //        if (destFile.exists()){
-//            MyLogger.d("ListViewModel - onExportDatabase - destFile.exists=true" )
+//            Timber.d("ListViewModel - onExportDatabase - destFile.exists=true" )
 //            destFile.delete()
 //        }
-//        MyLogger.d("ListViewModel - onExportDatabase - destFile.exists=" + destFile.exists())
+//        Timber.d("ListViewModel - onExportDatabase - destFile.exists=" + destFile.exists())
 //        try {
 //            databasePath.copyTo(destFile, overwrite = true)
-//            MyLogger.d("ListViewModel - onExportDatabase - exported")
+//            Timber.d("ListViewModel - onExportDatabase - exported")
 //            _message.value = context.resources.getString(R.string.db_exported)
 //        } catch (e: Exception) {
-//            MyLogger.e("ListViewModel - onExportDatabase - error=" + e)
+//            Timber.e("ListViewModel - onExportDatabase - error=" + e)
 //            _message.value = context.resources.getString(R.string.db_exported)
 //        }
 //    }
@@ -189,17 +189,17 @@ class ListViewModelOld(){}
 //                    input.copyTo(output)
 //                }
 //            }
-//            MyLogger.d("ExportDatabaseTool - db exported")
+//            Timber.d("ExportDatabaseTool - db exported")
 //            _message.value = context.resources.getString(R.string.db_exported, destPath)
 //        } catch (e: Exception) {
-//            MyLogger.e("ExportDatabaseTool - export error=$e")
+//            Timber.e("ExportDatabaseTool - export error=$e")
 //            _message.value = context.resources.getString(R.string.db_export_error, destPath)
 //        }
 //    }
 //
 //    fun importDatabaseFromUri(context:Context, uri: Uri) {
 //        val sourcePath = getFileNameFromUri(context, uri)
-//        MyLogger.d("ListViewModel - importDatabaseFromUri $sourcePath")
+//        Timber.d("ListViewModel - importDatabaseFromUri $sourcePath")
 //        try {
 //            MyApp.getInstance().closeDatabase()
 //
@@ -212,13 +212,13 @@ class ListViewModelOld(){}
 //                }
 //            }
 //
-//            MyLogger.d("ListViewModel - onImportDatabase - imported")
+//            Timber.d("ListViewModel - onImportDatabase - imported")
 //            _message.value = context.resources.getString(R.string.db_imported, sourcePath)
 //
 //            readTitleEntitiesFromDatabaseAsync()
 //
 //        } catch (e: Exception) {
-//            MyLogger.e("ListViewModel - onImportDatabase - error=" + e)
+//            Timber.e("ListViewModel - onImportDatabase - error=" + e)
 //            _message.value = context.resources.getString(R.string.db_import_error, sourcePath)
 //        }
 //    }

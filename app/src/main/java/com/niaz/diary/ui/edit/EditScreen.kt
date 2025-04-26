@@ -97,7 +97,7 @@ fun ShowNote(
         OutlinedTextField(
             value = note,
             onValueChange = onNoteChange,
-            label = { Text(text = stringResource(R.string.enter_value)) },
+//            label = { Text(text = stringResource(R.string.enter_value)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             modifier = Modifier
