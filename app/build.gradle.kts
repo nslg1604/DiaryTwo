@@ -83,5 +83,20 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.9")
 //    testImplementation("app.cash.turbine:turbine:1.0.0")
 //    testImplementation("androidx.arch.core:core-testing:2.2.0")
+}
 
+tasks.withType<Test> {
+    reports {
+        html.required = true
+    }
+
+    testLogging {
+        events("passed", "skipped", "failed", "standardOut", "standardError")
+        showExceptions = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showCauses = true
+        showStackTraces = true
+
+        showStandardStreams = true
+    }
 }

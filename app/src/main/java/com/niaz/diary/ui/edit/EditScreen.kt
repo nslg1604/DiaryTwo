@@ -11,14 +11,20 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.ImeOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,7 +32,9 @@ import com.niaz.diary.R
 import com.niaz.diary.mvi.edit.EditEvent
 import com.niaz.diary.mvi.edit.EditViewModel
 import com.niaz.diary.utils.MyConst
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import timber.log.Timber
 
 @Composable
 fun EditScreen(viewModel: EditViewModel) {
@@ -79,6 +87,7 @@ fun EditScreen(viewModel: EditViewModel) {
             onDone = { viewModel.onEvent(EditEvent.BackClicked); context.finish() }
         )
     }
+
 }
 
 @Composable
@@ -87,6 +96,9 @@ fun ShowNote(
     onNoteChange: (String) -> Unit,
     onDone: () -> Unit
 ) {
+    val focusRequester = remember { FocusRequester() }
+//    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,14 +109,45 @@ fun ShowNote(
         OutlinedTextField(
             value = note,
             onValueChange = onNoteChange,
-//            label = { Text(text = stringResource(R.string.enter_value)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done,
+                autoCorrect = false
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { onDone() }
+            ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            keyboardActions = KeyboardActions(onDone = { onDone() })
+                .focusRequester(focusRequester)
         )
+
+
+//        OutlinedTextField(
+//            value = note,
+//            onValueChange = onNoteChange,
+//            keyboardOptions = KeyboardOptions(
+//                keyboardType = KeyboardType.Number,
+//                imeAction = ImeAction.Done,
+//                autoCorrect = false
+//            ),
+//            keyboardActions = KeyboardActions(
+//                onDone = { onDone() }
+//            ),
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .focusRequester(focusRequester)
+//        )
+    }
+
+    LaunchedEffect(focusRequester) {
+        delay(100)
+        try {
+            focusRequester.requestFocus()
+  //          keyboardController?.show()
+        } catch (e: IllegalStateException) {
+            Timber.e(e, "FocusRequester error")
+        }
     }
 }
 

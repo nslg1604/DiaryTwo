@@ -180,36 +180,7 @@ class ListViewModel @Inject constructor(
         }
     }
 
-//    fun importDatabaseFromUri(context: Context, uri: Uri) {
-//        viewModelScope.launch {
-//            try {
-//                // Implementation for database import logic
-//                // This would involve copying data from the Uri to your app's database
-//                val message = "Database imported successfully"
-//                showMessage(message)
-//                loadTitlesAsync() // Refresh the list after import
-//            } catch (e: Exception) {
-//                Timber.d("Error importing database: ${e.message}")
-//                showMessage("Error importing database: ${e.message}")
-//            }
-//        }
-//    }
-//
-//    fun exportDatabaseFromUri(context: Context, uri: Uri) {
-//        viewModelScope.launch {
-//            try {
-//                // Implementation for database export logic
-//                // This would involve copying your app's database to the Uri
-//                val message = "Database exported successfully"
-//                showMessage(message)
-//            } catch (e: Exception) {
-//                Timber.d("Error exporting database: ${e.message}")
-//                showMessage("Error exporting database: ${e.message}")
-//            }
-//        }
-//    }
-
-    fun exportDatabaseFromUri(context:Context, uri: Uri) {
+    fun exportDatabaseFromUri(context: Context, uri: Uri) {
         val destPath = getFileNameFromUri(context, uri)
         try {
             val dbPath = File(context.filesDir.parent, "databases/${MyConst.DB_NAME}")
@@ -228,7 +199,7 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    fun importDatabaseFromUri(context:Context, uri: Uri) {
+    fun importDatabaseFromUri(context: Context, uri: Uri) {
         val sourcePath = getFileNameFromUri(context, uri)
         Timber.d("ListViewModel - importDatabaseFromUri $sourcePath")
         try {
@@ -278,12 +249,13 @@ class ListViewModel @Inject constructor(
 
     suspend fun initTitleEntities() {
         val context = MyApp.getInstance()
-        titleRepo.insertTitle(TitleEntity(context.getString(R.string.title_1)))
-        titleRepo.insertTitle(TitleEntity(context.getString(R.string.title_2)))
-        titleRepo.insertTitle(TitleEntity(context.getString(R.string.title_3)))
-        titleRepo.insertTitle(TitleEntity(context.getString(R.string.title_4)))
+        titleRepo.apply {
+            insertTitle(TitleEntity(context.getString(R.string.title_1)))
+            insertTitle(TitleEntity(context.getString(R.string.title_2)))
+            insertTitle(TitleEntity(context.getString(R.string.title_3)))
+            insertTitle(TitleEntity(context.getString(R.string.title_4)))
+        }
     }
-
 }
 
 /**
